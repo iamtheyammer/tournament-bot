@@ -70,7 +70,7 @@ async function ignHandler(
         const tagIndex = playerIGNs.findIndex((data) => data.tag === args[2]);
         console.log(tagIndex);
         if (tagIndex === -1) {
-          msg.channel.send(embeds.getIGNFailure(true, id, args[2]));
+          msg.channel.send(embeds.getIGNFailed(true, id, args[2]));
           return;
         }
         id = playerIGNs[tagIndex].id;
@@ -79,7 +79,19 @@ async function ignHandler(
       if (index !== -1) {
         msg.channel.send(embeds.getIGNSuccess(playerIGNs[index].ign, id));
       } else {
-        msg.channel.send(embeds.getIGNFailure(false, id));
+        msg.channel.send(embeds.getIGNFailed(false, id));
+      }
+      break;
+    }
+    case "delink": {
+      const index = playerIGNs.findIndex((data) => data.id === msg.author.id);
+      if (index === -1) {
+        msg.channel.send(embeds.delinkFailed(msg.author.id));
+      } else {
+        msg.channel.send(
+          embeds.delinkSuccess(msg.author.id, playerIGNs[index].ign)
+        );
+        playerIGNs.splice(index, 1);
       }
       break;
     }

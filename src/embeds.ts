@@ -43,7 +43,7 @@ export function getIGNSuccess(ign: string, id: string): Discord.MessageEmbed {
     .setFooter("Made by iamtheyammer and SweetPlum | d.craft Tournament Bot");
 }
 
-export function getIGNFailure(
+export function getIGNFailed(
   notAUser: boolean,
   id?: string,
   tag?: string
@@ -57,6 +57,24 @@ export function getIGNFailure(
           ? `Couldn't grab \`${tag}\`'s in game name because that user doesn't exist or their data is missing.`
           : `Couldn't grab <@${id}>'s in game name because they haven't linked their discord yet.`
       }`
+    )
+    .setFooter("Made by iamtheyammer and SweetPlum | d.craft Tournament Bot");
+}
+
+export function delinkSuccess(id: string, ign: string): Discord.MessageEmbed {
+  return new Discord.MessageEmbed()
+    .setColor("#ff0000")
+    .setTitle("IGN Delinking Success")
+    .setDescription(`Successfully delinked <@${id}> from \`${ign}\`.`)
+    .setFooter("Made by iamtheyammer and SweetPlum | d.craft Tournament Bot");
+}
+
+export function delinkFailed(id: string): Discord.MessageEmbed {
+  return new Discord.MessageEmbed()
+    .setColor("#ff0000")
+    .setTitle("IGN Delinking Failed")
+    .setDescription(
+      `Could not delink <@${id}> from an IGN because there was no link to begin with.`
     )
     .setFooter("Made by iamtheyammer and SweetPlum | d.craft Tournament Bot");
 }
