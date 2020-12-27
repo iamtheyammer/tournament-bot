@@ -12,6 +12,7 @@ const prefix = "!";
 
 client.on("ready", () => {
   console.log("Bot ready!");
+  client.user.setActivity("over you ;)", { type: "WATCHING" });
 });
 
 // Interfaces
