@@ -36,8 +36,9 @@ async function ignHandler(
     case "link": {
       const resp = await fetchPlayerData(args[2]);
       const discordName: string = resp.data.player.socialMedia.links.DISCORD;
+      const ign: string = resp.data.player.displayname;
       if (discordName === msg.author.tag) {
-        msg.channel.send(embeds.linkSuccess(args[2], msg.author.id));
+        msg.channel.send(embeds.linkSuccess(ign, msg.author.id));
         const index = playerIGNs.findIndex(
           (data) => data.tag === msg.author.tag
         );
@@ -45,17 +46,42 @@ async function ignHandler(
           playerIGNs.splice(index, 1);
         }
         playerIGNs.push({
-          tag: msg.author.tag,
+          tag: msg.author.tag.toLowerCase(),
           id: msg.author.id,
-          ign: args[2],
+          ign: ign,
         });
       } else {
-        msg.channel.send(embeds.linkFailed(args[2], msg.author.id));
+        msg.channel.send(embeds.linkFailed(ign, msg.author.id));
       }
       break;
     }
     case "list": {
       msg.channel.send(embeds.ignList(playerIGNs));
+      break;
+    }
+    case "get": {
+      let idtemp: Array<string>;
+      let id: string;
+      if (args[2].startsWith("<")) {
+        idtemp = args[2].split("").slice(3, args[2].split("").length);
+        idtemp.pop();
+        id = idtemp.join("");
+      } else {
+        const tagIndex = playerIGNs.findIndex((data) => data.tag === args[2]);
+        console.log(tagIndex);
+        if (tagIndex === -1) {
+          msg.channel.send(embeds.getIGNFailure(true, id, args[2]));
+          return;
+        }
+        id = playerIGNs[tagIndex].id;
+      }
+      const index = playerIGNs.findIndex((data) => data.id === id);
+      if (index !== -1) {
+        msg.channel.send(embeds.getIGNSuccess(playerIGNs[index].ign, id));
+      } else {
+        msg.channel.send(embeds.getIGNFailure(false, id));
+      }
+      break;
     }
   }
 }
@@ -64,7 +90,7 @@ async function ignHandler(
 
 client.on("message", (msg) => {
   if (msg.author.bot) return;
-  const args = msg.content.split(" ");
+  const args = msg.content.split(" ").map((argument) => argument.toLowerCase());
   const subcommand = args[0].split("");
   if (subcommand[0] === prefix) {
     subcommand.shift();

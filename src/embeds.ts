@@ -34,3 +34,29 @@ export function linkFailed(ign: string, id: string): Discord.MessageEmbed {
     )
     .setFooter("Made by iamtheyammer and SweetPlum | d.craft Tournament Bot");
 }
+
+export function getIGNSuccess(ign: string, id: string): Discord.MessageEmbed {
+  return new Discord.MessageEmbed()
+    .setColor("#00ff00")
+    .setTitle("IGN Grab Success")
+    .setDescription(`<@${id}>'s in game name is \`${ign}\`.`)
+    .setFooter("Made by iamtheyammer and SweetPlum | d.craft Tournament Bot");
+}
+
+export function getIGNFailure(
+  notAUser: boolean,
+  id?: string,
+  tag?: string
+): Discord.MessageEmbed {
+  return new Discord.MessageEmbed()
+    .setColor("#ff0000")
+    .setTitle("IGN Grab Failed")
+    .setDescription(
+      `${
+        notAUser
+          ? `Couldn't grab \`${tag}\`'s in game name because that user doesn't exist or their data is missing.`
+          : `Couldn't grab <@${id}>'s in game name because they haven't linked their discord yet.`
+      }`
+    )
+    .setFooter("Made by iamtheyammer and SweetPlum | d.craft Tournament Bot");
+}
