@@ -35,6 +35,26 @@ export function linkFailed(ign: string, id: string): Discord.MessageEmbed {
     .setFooter("Made by iamtheyammer and SweetPlum | d.craft Tournament Bot");
 }
 
+export function linkWrongUser(ign: string, id: string): Discord.MessageEmbed {
+  return new Discord.MessageEmbed()
+    .setColor("#ff0000")
+    .setTitle("Link Failed")
+    .setDescription(
+      `Failed to link user <@${id}> to \`${ign}\` because \`${ign}\` does not exist or an error occurred with the bot.`
+    )
+    .setFooter("Made by iamtheyammer and SweetPlum | d.craft Tournament Bot");
+}
+
+export function linkBadUser(ign: string, id: string): Discord.MessageEmbed {
+  return new Discord.MessageEmbed()
+    .setColor("#ff0000")
+    .setTitle("Link Failed")
+    .setDescription(
+      `Failed to link user <@${id}> to \`${ign}\` because \`${ign}\` does not have a discord account linked.`
+    )
+    .setFooter("Made by iamtheyammer and SweetPlum | d.craft Tournament Bot");
+}
+
 export function getIGNSuccess(ign: string, id: string): Discord.MessageEmbed {
   return new Discord.MessageEmbed()
     .setColor("#00ff00")
@@ -75,6 +95,52 @@ export function delinkFailed(id: string): Discord.MessageEmbed {
     .setTitle("IGN Delinking Failed")
     .setDescription(
       `Could not delink <@${id}> from an IGN because there was no link to begin with.`
+    )
+    .setFooter("Made by iamtheyammer and SweetPlum | d.craft Tournament Bot");
+}
+
+export function ignInfo(prefix: string): Discord.MessageEmbed {
+  return new Discord.MessageEmbed()
+    .setColor("#0099ff")
+    .setTitle("IGN Subcommands")
+    .setDescription(`List of all commands that use ${prefix}ign to begin with.`)
+    .addFields(
+      {
+        name: `\`${prefix}ign link <username>\``,
+        value: `Allows you to link your discord profile to hypixel. Must have linked your discord on hypixel's social media link system.\nUsage: **${prefix}ign link SweetPlum**`,
+      },
+      {
+        name: `\`${prefix}ign get <mention | tag>\``,
+        value: `Queries the database to find someone's IGN.\nUsage: **${prefix}ign get <@302942608676880385>**\nAlternate usage: **${prefix}ign get Sweetplum123#6205**`,
+      },
+      {
+        name: `\`${prefix}ign delink\``,
+        value: `Removes any existing link you have with your minecraft username.\nUsage: **${prefix}ign delink**`,
+      },
+      {
+        name: `\`${prefix}ign list\``,
+        value: `Lists all discord users that have linked their discord and minecraft and displays their IGN below.\nUsage: **${prefix}ign list**`,
+      }
+    )
+    .setFooter("Made by iamtheyammer and SweetPlum | d.craft Tournament Bot");
+}
+
+export function linkArgumentMissing(prefix: string): Discord.MessageEmbed {
+  return new Discord.MessageEmbed()
+    .setColor("#ff0000")
+    .setTitle("Argument Missing")
+    .setDescription(
+      `You didn't put a username you wanted to link to.\nUsage: \`${prefix}ign link <username>\``
+    )
+    .setFooter("Made by iamtheyammer and SweetPlum | d.craft Tournament Bot");
+}
+
+export function getArgumentMissing(prefix: string): Discord.MessageEmbed {
+  return new Discord.MessageEmbed()
+    .setColor("#ff0000")
+    .setTitle("Argument Missing")
+    .setDescription(
+      `You didn't put a user you wanted to get the IGN of.\nUsage: \`${prefix}ign get <mention | tag>\``
     )
     .setFooter("Made by iamtheyammer and SweetPlum | d.craft Tournament Bot");
 }

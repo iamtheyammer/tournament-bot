@@ -34,7 +34,24 @@ async function ignHandler(
 ): Promise<void> {
   switch (args[1]) {
     case "link": {
+      if (!args[2]) {
+        msg.channel.send(embeds.linkArgumentMissing(prefix));
+        return;
+      }
       const resp = await fetchPlayerData(args[2]);
+      if (!resp.data.player) {
+        msg.channel.send(embeds.linkWrongUser(args[2], msg.author.id));
+        return;
+      }
+      try {
+        if (!resp.data.player.socialMedia.links.DISCORD) {
+          msg.channel.send(embeds.linkBadUser(args[2], msg.author.id));
+          return;
+        }
+      } catch {
+        msg.channel.send(embeds.linkBadUser(args[2], msg.author.id));
+        return;
+      }
       const discordName: string = resp.data.player.socialMedia.links.DISCORD;
       const ign: string = resp.data.player.displayname;
       if (discordName === msg.author.tag) {
@@ -60,6 +77,10 @@ async function ignHandler(
       break;
     }
     case "get": {
+      if (!args[2]) {
+        msg.channel.send(embeds.getArgumentMissing(prefix));
+        return;
+      }
       let idtemp: Array<string>;
       let id: string;
       if (args[2].startsWith("<")) {
@@ -94,6 +115,9 @@ async function ignHandler(
         playerIGNs.splice(index, 1);
       }
       break;
+    }
+    default: {
+      msg.channel.send(embeds.ignInfo(prefix));
     }
   }
 }
