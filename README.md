@@ -26,13 +26,13 @@ These commands are meant to assist users in linking their discord profiles to Hy
 
 ## Goals/ideas to implement
 ### Teams Subcommands
-These commands should allow display, creation, modification and deletion of tournament teams. Players can create teams and invite other discord members to their team. A full list of teams should be able to be displayed if queried for.
+These commands should allow display, creation, modification and deletion of tournament teams. Players can create teams and invite other users to their team. A full list of teams should be able to be displayed if queried for.
 
 ### Help Subcommands
-These commands will go in-depth into the bot's syntax, how to get it on your personal server, and other relatively important information.
+These commands will go in-depth into the bot's syntax, how to get it on your server, and other relatively important information.
 
 ### Stats-querying Subcommands
-These commands will allow you to get the bedwars/skywars/duels statistics of any Hypixel player. Will likely integrate this with teams to print out both individual and collective stats.
+These commands will allow you to get the bedwars/skywars/duels stats of any Hypixel player. Will likely integrate this with teams to print out both individual and collective stats.
 
 ## More coming soon!
 Since neither Sam or I code at light speed, it will take some time to fully develop, bug test and release this bot. Please stay patient during development!
