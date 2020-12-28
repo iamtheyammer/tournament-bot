@@ -1,14 +1,22 @@
 import { Message, MessageEmbed } from "discord.js";
-import { playerIGNs, prefix } from "../index";
+import { playerIGNs, prefix, Args } from "../index";
 
-export default async function get(msg: Message): Promise<void> {
-  if (!msg.mentions.members || !msg.mentions.members.first()) {
+export default async function get(msg: Message, args: Args): Promise<void> {
+  if (!msg.mentions.members.first() && !args[2]) {
     msg.channel.send(argumentMissingEmbed(prefix));
     return;
   }
-
-  const id = msg.mentions.members.first().id;
-
+  let id: string;
+  if (msg.mentions.members.first()) {
+    id = msg.mentions.members.first().id;
+  } else {
+    const index = playerIGNs.findIndex((data) => data.tag === args[2]);
+    if (index === -1) {
+      msg.channel.send(ignGetFailedEmbed(true, id, args[2]));
+      return;
+    }
+    id = playerIGNs[index].id;
+  }
   // TODO: Add data store
   const index = playerIGNs.findIndex((data) => data.id === id);
   if (index !== -1) {
