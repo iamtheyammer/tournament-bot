@@ -1,5 +1,3 @@
-// Import statements
-
 import * as Discord from "discord.js";
 import * as embeds from "./embeds";
 import { fetchPlayerData } from "./data";
