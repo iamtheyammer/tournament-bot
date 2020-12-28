@@ -1,5 +1,5 @@
 import { Message, MessageEmbed } from "discord.js";
-import { fetchPlayerData } from "../data";
+import { fetchPlayerData } from "../apis";
 import { prefix, playerIGNs, Args } from "../index";
 
 export default async function link(msg: Message, args: Args): Promise<void> {

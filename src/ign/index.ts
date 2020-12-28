@@ -19,7 +19,7 @@ export default async function ignHandler(
       break;
     }
     case "get": {
-      await get(msg);
+      await get(msg, args);
       break;
     }
     case "unlink": {
