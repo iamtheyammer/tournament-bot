@@ -2,7 +2,9 @@ import { Message } from "discord.js";
 import { teamCreating } from "../index";
 import confirm from "./confirm";
 import deny from "./deny";
+import join from "./join";
 import create from "./create";
+import invite from "./invite";
 export const alphanum = "abcdefghijklmnopqrstuvwxyz123456789";
 
 export default async function teamHandler(
@@ -28,6 +30,14 @@ export default async function teamHandler(
     switch (args[1]) {
       case "create": {
         await create(msg, args, argsCapital);
+        break;
+      }
+      case "invite": {
+        await invite(msg);
+        break;
+      }
+      case "join": {
+        await join(msg, args);
         break;
       }
     }

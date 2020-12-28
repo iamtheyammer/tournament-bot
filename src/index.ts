@@ -29,6 +29,7 @@ export interface fullTeam {
   description: string;
   leader: string;
   members: Array<string>;
+  invites: Array<string>;
 }
 
 export interface team {
@@ -43,6 +44,7 @@ export interface team {
 export const playerIGNs: Array<playerIGN> = [];
 
 client.on("message", async (msg) => {
+  console.log(teams);
   if (msg.author.bot || !msg.content.startsWith(prefix)) return;
   const args = msg.content
     .split(" ")
@@ -56,10 +58,10 @@ client.on("message", async (msg) => {
       break;
     }
     case "team": {
-      if (playerIGNs.findIndex((data) => data.id === msg.author.id) === -1) {
-        msg.channel.send(noIGNLinked(prefix));
-        return;
-      }
+      // if (playerIGNs.findIndex((data) => data.id === msg.author.id) === -1) {
+      // msg.channel.send(noIGNLinked(prefix));
+      // return;
+      // }
       teamHandler(msg, args, argsCapital);
       break;
     }

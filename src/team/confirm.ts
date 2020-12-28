@@ -18,6 +18,7 @@ export default async function confirm(
     description: "None",
     leader: teamCreating[index].leader,
     members: [teamCreating[index].leader],
+    invites: [],
   });
   teamCreating.splice(
     teamCreating.findIndex(
