@@ -1,5 +1,4 @@
 import * as Discord from "discord.js";
-import * as embeds from "./embeds";
 import ignHandler from "./ign";
 import teamHandler from "./team";
 const client = new Discord.Client();
@@ -58,7 +57,7 @@ client.on("message", async (msg) => {
     }
     case "team": {
       if (playerIGNs.findIndex((data) => data.id === msg.author.id) === -1) {
-        msg.channel.send(embeds.noIGNLinked(prefix));
+        msg.channel.send(noIGNLinked(prefix));
         return;
       }
       teamHandler(msg, args, argsCapital);
@@ -68,3 +67,13 @@ client.on("message", async (msg) => {
 });
 
 client.login(token);
+
+export function noIGNLinked(prefix: string): Discord.MessageEmbed {
+  return new Discord.MessageEmbed()
+    .setColor("#ff0000")
+    .setTitle("Team Command Blocked")
+    .setDescription(
+      `You cannot use any team commands because you haven't linked your discord account to Hypixel. Use \`${prefix}ign link <name>\` to link your account.`
+    )
+    .setFooter("Made by iamtheyammer and SweetPlum | d.craft Tournament Bot");
+}
