@@ -26,7 +26,6 @@ export default async function join(
       1
     );
     teams[tagIndex].members.push(msg.author.id);
-    console.log(teams);
     msg.channel.send(
       joinedTeamEmbed(teams[tagIndex].tag, teams[tagIndex].name)
     );

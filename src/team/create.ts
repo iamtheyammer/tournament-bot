@@ -1,6 +1,5 @@
 import { Message, MessageEmbed } from "discord.js";
 import { teams, teamCreating, prefix } from "../index";
-import { alphanum } from "./index";
 
 export default async function create(
   msg: Message,
@@ -13,13 +12,6 @@ export default async function create(
   }
   const teamTag = teamData[0].toUpperCase();
   const teamTest = teamTag.split("");
-  for (let i = 0; i < teamTest.length; i++) {
-    if (!alphanum.includes(teamTest[i].toLowerCase())) {
-      console.log(teamTest);
-      msg.channel.send("not alphanumeric");
-      return;
-    }
-  }
   teamData.shift();
   const teamName = teamData.join(" ");
   if (teams.findIndex((arg) => arg.members.includes(msg.author.id)) !== -1) {
@@ -28,6 +20,10 @@ export default async function create(
   }
   if (teams.findIndex((arg) => arg.tag === teamTag) !== -1) {
     msg.channel.send(tagAlreadyExistsEmbed(teamTag, teamName));
+    return;
+  }
+  if (!/^[A-z0-9]{1,6}$/.test(teamTag)) {
+    msg.channel.send(notAlphaNumericEmbed(teamTag, teamName));
     return;
   }
   msg.channel.send(teamCreationConfirmEmbed(teamTag, teamName, prefix));
@@ -79,6 +75,16 @@ function alreadyInTeamEmbed(tag: string, name: string): MessageEmbed {
     .setTitle("Team Creation Not Allowed")
     .setDescription(
       `You cannot create \`[${tag}] ${name}\` because you are already in a team.`
+    )
+    .setFooter("Made by iamtheyammer and SweetPlum | d.craft Tournament Bot");
+}
+
+function notAlphaNumericEmbed(tag: string, name: string): MessageEmbed {
+  return new MessageEmbed()
+    .setColor("#ff0000")
+    .setTitle("Team Creation Not Allowed")
+    .setDescription(
+      `You cannot create \`[${tag}] ${name}\` because the tag is not alphanumeric, the tag is too long, or the tag wasn't given.`
     )
     .setFooter("Made by iamtheyammer and SweetPlum | d.craft Tournament Bot");
 }

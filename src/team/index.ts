@@ -2,10 +2,10 @@ import { Message } from "discord.js";
 import { teamCreating } from "../index";
 import confirm from "./confirm";
 import deny from "./deny";
+import info from "./info";
 import join from "./join";
 import create from "./create";
 import invite from "./invite";
-export const alphanum = "abcdefghijklmnopqrstuvwxyz123456789";
 
 export default async function teamHandler(
   msg: Message,
@@ -38,6 +38,10 @@ export default async function teamHandler(
       }
       case "join": {
         await join(msg, args);
+        break;
+      }
+      case "info": {
+        await info(msg, args);
         break;
       }
     }

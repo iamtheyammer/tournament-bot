@@ -71,7 +71,6 @@ export default async function invite(msg: Message): Promise<void> {
         msg.guild.members.cache
           .get(msg.mentions.members.first().id)
           .send(inviteExpiredEmbed(teams[index].tag, teams[index].name));
-        console.log(teams);
       }, 900000);
     })
     .catch(() => {
