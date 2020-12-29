@@ -8,15 +8,7 @@ const token = process.env.DISCORD_TOKEN;
 export const hypixelApiKey = process.env.HYPIXEL_API_KEY;
 export const prefix = "!";
 
-export interface playerIGN {
-  tag: string;
-  id: string;
-  ign: string;
-}
-
 export type Args = Array<string>;
-
-export const playerIGNs: Array<playerIGN> = [];
 
 client.on("message", async (msg) => {
   if (msg.author.bot || !msg.content.startsWith(prefix)) return;

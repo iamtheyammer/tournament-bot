@@ -1,95 +1,135 @@
 import { Message, MessageEmbed } from "discord.js";
-import { fetchPlayerData } from "../apis";
-import { prefix, playerIGNs, Args } from "../index";
+import { fetchMojangUserProfile, fetchPlayerData } from "../apis";
+import { prefix, Args } from "../index";
+import { isMinecraftUsername } from "../util/regex";
+import { insertUser, listUsers, updateUser } from "../db/users";
+import { errorEmbed, successEmbed, warnEmbed } from "../util/embeds";
+import { compareUuids, normalizeUuid } from "../util/uuid";
 
 export default async function link(msg: Message, args: Args): Promise<void> {
-  if (!args[2]) {
-    msg.channel.send(argumentMissingEmbed(prefix));
+  const username = args[2];
+
+  if (!username) {
+    msg.channel.send(
+      errorEmbed()
+        .setTitle("Argument Missing")
+        .setDescription(
+          `You didn't put a username you wanted to link to.\nUsage: \`${prefix}ign link <username>\``
+        )
+    );
     return;
   }
 
-  if (!/^[A-z0-9_]{2,16}$/.test(args[2])) {
-    msg.channel.send(wrongUserEmbed(args[2], msg.author.id));
+  if (!isMinecraftUsername(username)) {
+    msg.channel.send(wrongUserEmbed(username, msg.author.id));
     return;
   }
 
-  const player = await fetchPlayerData(args[2]);
+  const player = await fetchPlayerData(username);
   if (!player) {
-    msg.channel.send(wrongUserEmbed(args[2], msg.author.id));
+    msg.channel.send(wrongUserEmbed(username, msg.author.id));
     return;
   }
 
   if (!player.socialMedia || !player.socialMedia.links.DISCORD) {
-    msg.channel.send(noDiscordLinkedEmbed(args[2], msg.author.id));
+    msg.channel.send(
+      errorEmbed()
+        .setTitle("Link Failed")
+        .setDescription(
+          `Failed to link user <@${msg.author.id}> to \`${player.displayname}\` because \`${player.displayname}\` does not have a discord account linked.`
+        )
+    );
     return;
   }
 
   const discordName: string = player.socialMedia.links.DISCORD;
   const { displayname: ign, uuid } = player;
+  const hypixelUuid = normalizeUuid(uuid);
 
-  // TODO: Add data store
-  if (discordName === msg.author.tag) {
+  if (discordName !== msg.author.tag) {
+    msg.channel.send(
+      errorEmbed()
+        .setTitle("Link Failed")
+        .setDescription(
+          `Failed to link user <@${msg.author.id}> to \`${ign}\` because \`${ign}\` has a different discord account linked to Hypixel.`
+        )
+    );
+    return;
+  }
+
+  // create user if not exists
+  const users = await listUsers({ discord_id: msg.author.id });
+
+  if (!users.length) {
+    // insert user
+    await insertUser({ discord_id: msg.author.id, minecraft_uuid: uuid });
     msg.channel.send(linkSuccessEmbed(ign, msg.author.id));
+    return;
+  }
 
-    const index = playerIGNs.findIndex((data) => data.tag === msg.author.tag);
-    if (index !== -1) {
-      playerIGNs.splice(index, 1);
+  // check for linked user
+
+  const user = users[0];
+
+  if (user.minecraft_uuid) {
+    if (compareUuids(user.minecraft_uuid, uuid)) {
+      msg.channel.send(
+        warnEmbed()
+          .setTitle("Already linked")
+          .setDescription(
+            `<@${msg.author.id} is already linked to \`${ign}\`. Use \`${prefix}ign unlink\`, then run this command again.`
+          )
+      );
+      return;
     }
-    playerIGNs.push({
-      tag: msg.author.tag.toLowerCase(),
-      id: msg.author.id,
-      ign: ign,
+
+    const oldMojangUserProfile = await fetchMojangUserProfile(
+      user.minecraft_uuid
+    );
+
+    // update linked user
+    await updateUser({
+      where: { discord_id: msg.author.id },
+      minecraft_uuid: uuid,
+    });
+    msg.channel.send(
+      successEmbed()
+        .setTitle("Successfully linked!")
+        .setDescription(
+          `Updated the user linked to <@${msg.author.id} from \`${oldMojangUserProfile.name}\` to \`${ign}\`.`
+        )
+    );
+  }
+
+  // linking user
+
+  if (user) {
+    await updateUser({
+      where: { discord_id: msg.author.id },
+      minecraft_uuid: hypixelUuid,
     });
   } else {
-    msg.channel.send(differentDiscordLinkedEmbed(ign, msg.author.id));
+    await insertUser({
+      discord_id: msg.author.id,
+      minecraft_uuid: hypixelUuid,
+    });
   }
+
+  msg.channel.send(linkSuccessEmbed(ign, msg.author.id));
 }
 
-function argumentMissingEmbed(prefix: string): MessageEmbed {
-  return new MessageEmbed()
-    .setColor("#ff0000")
-    .setTitle("Argument Missing")
-    .setDescription(
-      `You didn't put a username you wanted to link to.\nUsage: \`${prefix}ign link <username>\``
-    )
-    .setFooter("Made by iamtheyammer and SweetPlum | d.craft Tournament Bot");
-}
 function wrongUserEmbed(ign: string, id: string): MessageEmbed {
-  return new MessageEmbed()
+  return errorEmbed()
     .setColor("#ff0000")
     .setTitle("Link Failed")
     .setDescription(
       `Failed to link user <@${id}> to \`${ign}\` because \`${ign}\` does not exist or an error occurred with the bot.`
-    )
-    .setFooter("Made by iamtheyammer and SweetPlum | d.craft Tournament Bot");
+    );
 }
 
-function noDiscordLinkedEmbed(ign: string, id: string): MessageEmbed {
-  return new MessageEmbed()
-    .setColor("#ff0000")
-    .setTitle("Link Failed")
-    .setDescription(
-      `Failed to link user <@${id}> to \`${ign}\` because \`${ign}\` does not have a discord account linked.`
-    )
-    .setFooter("Made by iamtheyammer and SweetPlum | d.craft Tournament Bot");
-}
-
-export function differentDiscordLinkedEmbed(
-  ign: string,
-  id: string
-): MessageEmbed {
-  return new MessageEmbed()
-    .setColor("#ff0000")
-    .setTitle("Link Failed")
-    .setDescription(
-      `Failed to link user <@${id}> to \`${ign}\` because \`${ign}\` has a different discord account linked to Hypixel.`
-    )
-    .setFooter("Made by iamtheyammer and SweetPlum | d.craft Tournament Bot");
-}
 export function linkSuccessEmbed(ign: string, id: string): MessageEmbed {
-  return new MessageEmbed()
+  return successEmbed()
     .setColor("#00ff00")
     .setTitle("Link Success")
-    .setDescription(`Successfully linked user <@${id}> to \`${ign}\`.`)
-    .setFooter("Made by iamtheyammer and SweetPlum | d.craft Tournament Bot");
+    .setDescription(`Successfully linked user <@${id}> to \`${ign}\`.`);
 }

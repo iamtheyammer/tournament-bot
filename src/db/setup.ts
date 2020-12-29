@@ -11,6 +11,7 @@ export async function setupDatabase(): Promise<DatabaseSetupResult> {
   const usersStatus = await setupUsersTable(trx);
   const tournamentsStatus = await setupTournamentsTable(trx);
   const teamsStatus = await setupTeamsTable(trx);
+  const teamInvitesStatus = await setupTeamInvitesTable(trx);
   const teamMembershipsStatus = await setupTeamMembershipsTable(trx);
 
   await trx.commit();
@@ -19,6 +20,7 @@ export async function setupDatabase(): Promise<DatabaseSetupResult> {
     users: usersStatus,
     tournaments: tournamentsStatus,
     teams: teamsStatus,
+    team_invites: teamInvitesStatus,
     team_memberships: teamMembershipsStatus,
   };
 }
@@ -35,8 +37,9 @@ async function setupUsersTable(
   }
 
   await trx.schema.createTable("users", (tableBuilder) => {
-    tableBuilder.bigInteger("discord_id").primary().notNullable();
+    tableBuilder.text("discord_id").primary().notNullable();
     tableBuilder.uuid("minecraft_uuid");
+    tableBuilder.timestamp("inserted_at").defaultTo(trx.fn.now()).notNullable();
   });
 
   return "created";
@@ -59,6 +62,9 @@ async function setupTournamentsTable(
     tableBuilder.text("short_name").unique().notNullable();
     tableBuilder.index("short_name");
     tableBuilder.text("gamemode").notNullable();
+    tableBuilder.timestamp("opens_at");
+    tableBuilder.timestamp("starts_at");
+    tableBuilder.timestamp("inserted_at").defaultTo(trx.fn.now()).notNullable();
   });
 
   return "created";
@@ -83,9 +89,42 @@ async function setupTeamsTable(
       .notNullable();
     tableBuilder.text("name").notNullable();
     tableBuilder.text("tag").unique().notNullable();
-    tableBuilder.index("tag");
+    tableBuilder.unique(["tournament_id", "tag"]);
     tableBuilder.text("description");
     tableBuilder.boolean("public").notNullable().defaultTo(false);
+    tableBuilder.timestamp("inserted_at").defaultTo(trx.fn.now()).notNullable();
+  });
+
+  return "created";
+}
+
+async function setupTeamInvitesTable(
+  trx: Knex.Transaction
+): Promise<DatabaseChangeType> {
+  const teamInvitesTableExists = await trx.schema.hasTable("team_invites");
+
+  if (teamInvitesTableExists) {
+    // we might need to check for certain columns in the future
+
+    console.log("team invites unchanged");
+    return "unchanged";
+  }
+
+  await trx.schema.createTable("team_invites", (tableBuilder) => {
+    tableBuilder.increments("id").primary().notNullable();
+    tableBuilder.integer("team_id").references("teams.id").notNullable();
+    tableBuilder
+      .text("invited_user_id")
+      .references("users.discord_id")
+      .notNullable();
+    tableBuilder
+      .text("inviter_user_id")
+      .references("users.discord_id")
+      .notNullable();
+    tableBuilder.boolean("retracted").notNullable().defaultTo(false);
+    tableBuilder.text("note");
+    tableBuilder.timestamp("expires_at");
+    tableBuilder.timestamp("inserted_at").defaultTo(trx.fn.now()).notNullable();
   });
 
   return "created";
@@ -104,16 +143,17 @@ async function setupTeamMembershipsTable(
 
   await trx.schema.createTable("team_memberships", (tableBuilder) => {
     tableBuilder.increments("id").primary().notNullable();
+    tableBuilder.text("user_id").references("users.discord_id").notNullable();
+    tableBuilder.integer("team_id").references("teams.id").notNullable();
     tableBuilder
       .integer("tournament_id")
       .references("tournaments.id")
       .notNullable();
-    tableBuilder
-      .bigInteger("user_id")
-      .references("users.discord_id")
-      .notNullable();
-    tableBuilder.integer("team_id").references("teams.id").notNullable();
+    tableBuilder.unique(["user_id", "tournament_id"]);
+    tableBuilder.integer("invite_id").references("team_invites.id");
     tableBuilder.text("type").defaultTo("member").notNullable();
+    tableBuilder.timestamp("inserted_at").defaultTo(trx.fn.now()).notNullable();
+    ``;
   });
 
   return "created";

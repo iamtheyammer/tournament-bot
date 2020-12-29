@@ -26,7 +26,7 @@
     "typescript": "^4.0.2"
   },
   "scripts": {
-    "start": "nodemon -r dotenv/config -e js,ts,json --watch src --exec \"yarn compile && source .env && node\" dist/index.js",
+    "start": "nodemon -r dotenv/config -e js,ts,json --watch src --exec \"yarn compile && node\" dist/index.js",
     "compile": "tsc --outDir dist",
     "format": "prettier --write \"src/**/*.(j|t)s\"",
     "formatcheck": "prettier --config ./.prettierrc --check \"src/**/*.(j|t)s\"",

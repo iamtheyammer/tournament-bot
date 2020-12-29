@@ -1,12 +1,14 @@
-import db from "./index";
+import db, { DBQueryMeta, handleMeta } from "./index";
 
 export interface DBUser {
-  discord_id: number;
+  discord_id: string;
   minecraft_uuid?: string;
 }
 
-export async function createUser(req: DBUser): Promise<void> {
-  await db("users").insert(req);
+export async function insertUser(req: DBUser): Promise<number> {
+  const query = await db("users").insert(req);
+
+  return query[0];
 }
 
 export interface DBUserUpdateRequest {
@@ -18,13 +20,18 @@ export interface DBUserUpdateRequest {
 
 export async function updateUser(req: DBUserUpdateRequest): Promise<void> {
   await db("users")
-    .where({ discord_id: req.where.discord_id })
+    .where(req.where)
     .update({ minecraft_uuid: req.minecraft_uuid });
+}
+
+interface DBUserListRequestMeta extends DBQueryMeta {
+  require_uuid?: boolean;
 }
 
 interface DBUserListRequest {
   discord_id?: string | string[];
   minecraft_uuid?: string | string[];
+  meta?: DBUserListRequestMeta;
 }
 
 export async function listUsers(req: DBUserListRequest): Promise<DBUser[]> {
@@ -36,6 +43,16 @@ export async function listUsers(req: DBUserListRequest): Promise<DBUser[]> {
 
   if (req.minecraft_uuid) {
     query.where({ minecraft_uuid: req.minecraft_uuid });
+  }
+
+  if (req.meta) {
+    const { meta } = req;
+
+    if (meta.require_uuid) {
+      query.whereNotNull("minecraft_uuid");
+    }
+
+    handleMeta(query, meta);
   }
 
   return await query;
