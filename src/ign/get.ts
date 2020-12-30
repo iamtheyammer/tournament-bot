@@ -1,55 +1,51 @@
-import { Message, MessageEmbed } from "discord.js";
-import { playerIGNs, prefix } from "../index";
+import { Message } from "discord.js";
+import { Args, prefix } from "../index";
+import { listUsers } from "../db/users";
+import { fetchMojangUserProfile } from "../apis";
+import { errorEmbed, successEmbed } from "../util/embeds";
 
-export default async function get(msg: Message): Promise<void> {
-  if (!msg.mentions.members || !msg.mentions.members.first()) {
-    msg.channel.send(argumentMissingEmbed(prefix));
+export default async function get(msg: Message, args: Args): Promise<void> {
+  if (
+    (!msg.mentions.members || !msg.mentions.members.first()) &&
+    !/^[0-9]+$/.test(args[2])
+  ) {
+    msg.channel.send(
+      errorEmbed()
+        .setTitle("Argument Missing")
+        .setDescription(
+          `You didn't put a user you wanted to get the IGN of.\nUsage: \`${prefix}ign get <mention | discord user ID>\``
+        )
+    );
     return;
   }
 
-  const id = msg.mentions.members.first().id;
+  const userId = msg.mentions.members.first()
+    ? msg.mentions.members.first().id
+    : args[2];
 
-  // TODO: Add data store
-  const index = playerIGNs.findIndex((data) => data.id === id);
-  if (index !== -1) {
-    msg.channel.send(ignGetSuccessEmbed(playerIGNs[index].ign, id));
-  } else {
-    msg.channel.send(ignGetFailedEmbed(false, id));
+  // check for user
+  const users = await listUsers({ discord_id: userId });
+  if (!users.length || !users[0].minecraft_uuid) {
+    msg.channel.send(
+      errorEmbed()
+        .setTitle("IGN Grab Failed")
+        .setDescription(
+          `Couldn't get <@${userId}>'s in game name because they have not linked their name to their discord yet.`
+        )
+    );
+    return;
   }
-}
 
-function argumentMissingEmbed(prefix: string): MessageEmbed {
-  return new MessageEmbed()
-    .setColor("#ff0000")
-    .setTitle("Argument Missing")
-    .setDescription(
-      `You didn't put a user you wanted to get the IGN of.\nUsage: \`${prefix}ign get <mention | tag>\``
-    )
-    .setFooter("Made by iamtheyammer and SweetPlum | d.craft Tournament Bot");
-}
+  const mojangUserProfile = await fetchMojangUserProfile(
+    users[0].minecraft_uuid
+  );
 
-function ignGetSuccessEmbed(ign: string, id: string): MessageEmbed {
-  return new MessageEmbed()
-    .setColor("#00ff00")
-    .setTitle("IGN Grab Success")
-    .setDescription(`<@${id}>'s in game name is \`${ign}\`.`)
-    .setFooter("Made by iamtheyammer and SweetPlum | d.craft Tournament Bot");
-}
-
-function ignGetFailedEmbed(
-  notAUser: boolean,
-  id?: string,
-  tag?: string
-): MessageEmbed {
-  return new MessageEmbed()
-    .setColor("#ff0000")
-    .setTitle("IGN Grab Failed")
-    .setDescription(
-      `${
-        notAUser
-          ? `Couldn't grab \`${tag}\`'s in game name because that user doesn't exist or their data is missing.`
-          : `Couldn't grab <@${id}>'s in game name because they haven't linked their discord yet.`
-      }`
-    )
-    .setFooter("Made by iamtheyammer and SweetPlum | d.craft Tournament Bot");
+  msg.channel.send(
+    successEmbed()
+      .setTitle("IGN Grab Success")
+      .setDescription(
+        `<@${userId}>'s in game name is \`${mojangUserProfile.name}\`.`
+      )
+      .setThumbnail(`https://crafatar.com/avatars/${mojangUserProfile.id}`)
+  );
 }

@@ -1,30 +1,31 @@
-import { playerIGNs } from "../index";
-import { Message, MessageEmbed } from "discord.js";
+import { Message } from "discord.js";
+import { listUsers, updateUser } from "../db/users";
+import { errorEmbed, successEmbed } from "../util/embeds";
 
 export default async function unlink(msg: Message): Promise<void> {
-  const index = playerIGNs.findIndex((data) => data.id === msg.author.id);
-  if (index === -1) {
-    msg.channel.send(unlinkFailedEmbed(msg.author.id));
-  } else {
-    msg.channel.send(unlinkSuccessEmbed(msg.author.id, playerIGNs[index].ign));
-    playerIGNs.splice(index, 1);
+  const users = await listUsers({ discord_id: msg.author.id });
+
+  if (!users.length || !users[0].minecraft_uuid) {
+    msg.channel.send(
+      errorEmbed()
+        .setTitle("Unable to unlink")
+        .setDescription(
+          "You can't unlink your IGN because you never linked your IGN. " +
+            "Use `!ign link <minecraft username>` to get started."
+        )
+    );
+    return;
   }
-}
 
-function unlinkSuccessEmbed(id: string, ign: string): MessageEmbed {
-  return new MessageEmbed()
-    .setColor("#ff0000")
-    .setTitle("IGN Unlinking Success")
-    .setDescription(`Successfully unlinked <@${id}> from \`${ign}\`.`)
-    .setFooter("Made by iamtheyammer and SweetPlum | d.craft Tournament Bot");
-}
+  await updateUser({
+    where: { discord_id: msg.author.id },
+    minecraft_uuid: null,
+  });
 
-function unlinkFailedEmbed(id: string): MessageEmbed {
-  return new MessageEmbed()
-    .setColor("#ff0000")
-    .setTitle("IGN Unlinking Failed")
-    .setDescription(
-      `Could not unlink <@${id}> from an IGN because there was no link to begin with.`
-    )
-    .setFooter("Made by iamtheyammer and SweetPlum | d.craft Tournament Bot");
+  msg.channel.send(
+    successEmbed()
+      .setTitle("Successfully unlinked IGN")
+      .setDescription("Use `!ign link <minecraft username>` to link again.")
+  );
+  return;
 }

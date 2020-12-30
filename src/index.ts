@@ -1,27 +1,14 @@
 import * as Discord from "discord.js";
+import * as chalk from "chalk";
 import ignHandler from "./ign";
+import { setupDatabase } from "./db/setup";
 const client = new Discord.Client();
 const token = process.env.DISCORD_TOKEN;
 
 export const hypixelApiKey = process.env.HYPIXEL_API_KEY;
 export const prefix = "!";
 
-// Ready Message
-
-client.on("ready", () => {
-  console.log("Bot ready!");
-  client.user.setActivity("over you ;)", { type: "WATCHING" });
-});
-
-export interface playerIGN {
-  tag: string;
-  id: string;
-  ign: string;
-}
-
 export type Args = Array<string>;
-
-export const playerIGNs: Array<playerIGN> = [];
 
 client.on("message", async (msg) => {
   if (msg.author.bot || !msg.content.startsWith(prefix)) return;
@@ -39,4 +26,25 @@ client.on("message", async (msg) => {
   }
 });
 
-client.login(token);
+client.on("ready", () => {
+  console.log(chalk.green("Bot running successfully!"));
+  client.user.setActivity("over you ;)", { type: "WATCHING" });
+});
+
+async function init() {
+  console.log(chalk.bold.white("Starting Tournament Bot"));
+  try {
+    console.log(chalk.white("Checking and configuring database..."));
+    const tableStatuses = await setupDatabase();
+    Object.entries(tableStatuses).forEach((ts) =>
+      console.log(chalk.gray(`    ${ts.join(": ")}`))
+    );
+  } catch (e) {
+    console.error(chalk.red("Error configuring database!"), e);
+    process.exit(2);
+  }
+
+  await client.login(token);
+}
+
+init();
