@@ -1,6 +1,8 @@
 import * as Discord from "discord.js";
+import * as chalk from "chalk";
 import ignHandler from "./ign";
 import teamHandler from "./team";
+import { setupDatabase } from "./db/setup";
 const client = new Discord.Client();
 const token = process.env.DISCORD_TOKEN;
 export const teamCreating: Array<team> = [];
@@ -41,8 +43,6 @@ export interface team {
 
 // Data Initialization
 
-export const playerIGNs: Array<playerIGN> = [];
-
 client.on("message", async (msg) => {
   if (msg.author.bot || !msg.content.startsWith(prefix)) return;
   const args = msg.content
@@ -67,14 +67,19 @@ client.on("message", async (msg) => {
   }
 });
 
-client.login(token);
-
-export function noIGNLinked(prefix: string): Discord.MessageEmbed {
-  return new Discord.MessageEmbed()
-    .setColor("#ff0000")
-    .setTitle("Team Command Blocked")
-    .setDescription(
-      `You cannot use any team commands because you haven't linked your discord account to Hypixel. Use \`${prefix}ign link <name>\` to link your account.`
-    )
-    .setFooter("Made by iamtheyammer and SweetPlum | d.craft Tournament Bot");
+async function init() {
+  console.log(chalk.bold.white("Starting Tournament Bot"));
+  try {
+    console.log(chalk.white("Checking and configuring database..."));
+    const tableStatuses = await setupDatabase();
+    Object.entries(tableStatuses).forEach((ts) =>
+      console.log(chalk.gray(`    ${ts.join(": ")}`))
+    );
+  } catch (e) {
+    console.error(chalk.red("Error configuring database!"), e);
+    process.exit(2);
+  }
+  await client.login(token);
 }
+
+init();

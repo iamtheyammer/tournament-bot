@@ -14,7 +14,7 @@ These commands are meant to assist users in linking their discord profiles to Hy
 - The person mentioned actually exists 
 - If they have linked their discord.
 
-`!ign delink`: Attempts to delink the sender of the command to any IGN they may have linked before. Only succeeds if the sender already has a linked IGN.
+`!ign unlink`: Attempts to unlink the sender of the command to any IGN they may have linked before. Only succeeds if the sender already has a linked IGN.
 
 `!ign list`: Lists all discord users that have linked their IGN to their discord.
 
