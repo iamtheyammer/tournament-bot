@@ -5,8 +5,13 @@ import { listTeamMemberships } from "../db/team_memberships";
 import { prefix } from "../index";
 
 export default async function invite(msg: Message): Promise<void> {
-  const teamMembers = await listTeamMemberships({ user_id: msg.author.id });
-  const team = await listTeams({ id: teamMembers[0].id });
+  const teamMembers = await listTeamMemberships({
+    user_id: msg.author.id,
+    meta: { order_by: { exp: "team_memberships.inserted_at", dir: "DESC" } },
+  });
+  const team = await listTeams({
+    id: teamMembers[0].team_id,
+  });
   if (!teamMembers.length) {
     msg.channel.send(notInTeamEmbed(msg.mentions.members.first().id));
     return;
@@ -19,6 +24,7 @@ export default async function invite(msg: Message): Promise<void> {
   }
   const invitee = await listTeamMemberships({
     user_id: msg.mentions.members.first().id,
+    meta: { order_by: { exp: "team_memberships.inserted_at", dir: "DESC" } },
   });
   if (invitee.length) {
     msg.channel.send(
@@ -43,7 +49,10 @@ export default async function invite(msg: Message): Promise<void> {
     );
     return;
   }
-  if (invitee[0].team_id === team[0].id && invitee[0].tournament_id === team[0].tournament_id) {
+  if (
+    invitee[0].team_id === team[0].id &&
+    invitee[0].tournament_id === team[0].tournament_id
+  ) {
     msg.channel.send(
       alreadyInTeamEmbed(
         team[0].tag,
@@ -95,12 +104,9 @@ function inviteSuccess(tag: string, name: string, id: string): MessageEmbed {
   return new MessageEmbed()
     .setColor("#00ff00")
     .setTitle("Successfully Invited ")
-    .setDescription(
-      `Invited <@${id}> to join \`[${tag}] ${name}\`.`
-    )
+    .setDescription(`Invited <@${id}> to join \`[${tag}] ${name}\`.`)
     .setFooter("Made by iamtheyammer and SweetPlum | d.craft Tournament Bot");
 }
-
 
 function cannotInviteBotEmbed(
   tag: string,

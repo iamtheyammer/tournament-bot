@@ -8,8 +8,13 @@ import {
 import { Args } from "../index";
 
 export default async function join(msg: Message, args: Args): Promise<void> {
-  const teamMembers = await listTeamMemberships({ user_id: msg.author.id });
-  const team = await listTeams({ id: teamMembers[0].id });
+  const teamMembers = await listTeamMemberships({
+    user_id: msg.author.id,
+    meta: { order_by: { exp: "team_memberships.inserted_at", dir: "DESC" } },
+  });
+  const team = await listTeams({
+    id: teamMembers[0].team_id,
+  });
   const requestedTeam = await listTeams({
     tag: args.splitCommand[2].toUpperCase(),
   });
