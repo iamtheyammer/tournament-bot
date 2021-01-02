@@ -37,7 +37,7 @@ These commands should allow display, creation, modification and deletion of tour
 | Command        | Purpose                                                                                                             | Syntax                                                               | Completed?        |
 | -------------- | ------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- | ----------------- |
 | !team create   | Allows you to create a team                                                                                         | !team create <tag> <team name in quotations> <description in quotes> | lmfao no          |
-| !team info     | Allows you to get information about a team using its tag, or get info about your own team by not providing a tag    | !team info <tag>                                                     | what do you think |
+| !team info     | Allows you to get information about a team using its tag, or get info about your own team by not providing a tag    | !team info [tag]                                                     | what do you think |
 | !team invite   | Allows you to invite a player to your team                                                                          | !team invite <mention>                                               | surprisingly yes  |
 | !team join     | Allows you to accept an invite and join a team                                                                      | !team join <tag>                                                     | surprisingly yes  |
 | !team leave    | Allows you to leave a team (disbands the team if you're the leader)                                                 | !team leave                                                          | not even started  |
@@ -50,9 +50,9 @@ These commands should allow display, creation, modification and deletion of tour
 
 These commands will go in-depth into the bot's syntax, how to get it on your server, and other relatively important information.
 
-| Command          | Purpose                                                 | Syntax                                                               | Completed?                       |
-| ---------------- | ------------------------------------------------------- | -------------------------------------------------------------------- | -------------------------------- |
-| !stats bw or !bw | Allows you to view the bedwars stats of a player a team | !team create <tag> <team name in quotations> <description in quotes> | haven't started stats subsection |
+| Command | Purpose                              | Syntax                    | Completed?                      |
+| ------- | ------------------------------------ | ------------------------- | ------------------------------- |
+| !help   | Allows you to get a list of commands | !help [subsection] <page> | haven't started help subsection |
 
 ### Stats-querying Subcommands
 
