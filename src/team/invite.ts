@@ -1,83 +1,75 @@
 import { Message, MessageEmbed } from "discord.js";
-import { teams, prefix } from "../index";
+import { listTeams } from "../db/teams";
+import { listTeamInvites } from "../db/team_invites";
+import { listTeamMemberships } from "../db/team_memberships";
+import { prefix } from "../index";
 
 export default async function invite(msg: Message): Promise<void> {
-  const index = teams.findIndex((arg) => arg.members.includes(msg.author.id));
-  if (index === -1) {
+  const teamMembers = await listTeamMemberships({ user_id: msg.author.id });
+  const team = await listTeams({ id: teamMembers[0].id });
+  if (!teamMembers.length) {
     msg.channel.send(notInTeamEmbed(msg.mentions.members.first().id));
     return;
   }
-  if (teams[index].leader !== msg.author.id) {
+  if (teamMembers[0].type !== "leader") {
     msg.channel.send(
-      notLeaderEmbed(
-        teams[index].tag,
-        teams[index].name,
-        msg.mentions.members.first().id
-      )
+      notLeaderEmbed(team[0].tag, team[0].name, msg.mentions.members.first().id)
     );
     return;
   }
-  if (
-    teams.findIndex((team) =>
-      team.members.includes(msg.mentions.members.first().id)
-    ) !== -1
-  ) {
+  const invitee = await listTeamMemberships({
+    user_id: msg.mentions.members.first().id,
+  });
+  if (invitee.length) {
     msg.channel.send(
       alreadyInDiffTeamEmbed(
-        teams[index].tag,
-        teams[index].name,
+        team[0].tag,
+        team[0].name,
         msg.mentions.members.first().id
       )
     );
     return;
   }
-  if (teams[index].invites.includes(msg.mentions.members.first().id)) {
+  const inviteList = await listTeamInvites({
+    invited_user_id: msg.mentions.members.first().id,
+  });
+  if (inviteList.length) {
     msg.channel.send(
       alreadyInvitedEmbed(
-        teams[index].tag,
-        teams[index].name,
+        team[0].tag,
+        team[0].name,
         msg.mentions.members.first().id
       )
     );
     return;
   }
-  if (teams[index].members.includes(msg.mentions.members.first().id)) {
+  if (invitee[0].team_id === team[0].id && invitee[0].tournament_id === team[0].tournament_id) {
     msg.channel.send(
       alreadyInTeamEmbed(
-        teams[index].tag,
-        teams[index].name,
+        team[0].tag,
+        team[0].name,
         msg.mentions.members.first().id
       )
     );
     return;
   }
-  teams[index].invites.push(msg.mentions.members.first().id);
   msg.guild.members.cache
     .get(msg.mentions.members.first().id)
-    .send(invitedToJoinEmbed(teams[index].tag, teams[index].name, prefix))
+    .send(invitedToJoinEmbed(team[0].tag, team[0].name, prefix))
     .then(() => {
       msg.channel.send(
         inviteSuccess(
-          teams[index].tag,
-          teams[index].name,
+          team[0].tag,
+          team[0].name,
           msg.mentions.members.first().id
         )
       );
-      setTimeout(() => {
-        teams[index].invites.splice(
-          teams[index].invites.findIndex((arg) => arg === msg.author.id),
-          1
-        );
-        msg.guild.members.cache
-          .get(msg.mentions.members.first().id)
-          .send(inviteExpiredEmbed(teams[index].tag, teams[index].name));
-      }, 900000);
     })
     .catch(() => {
       msg.channel.send(
         cannotInviteBotEmbed(
-          teams[index].tag,
-          teams[index].name,
+          team[0].tag,
+          team[0].name,
           msg.mentions.members.first().id
         )
       );
@@ -104,20 +96,11 @@ function inviteSuccess(tag: string, name: string, id: string): MessageEmbed {
     .setColor("#00ff00")
     .setTitle("Successfully Invited ")
     .setDescription(
-      `Invited <@${id}> to join \`[${tag}] ${name}\`. They have 15 minutes to accept.`
+      `Invited <@${id}> to join \`[${tag}] ${name}\`.`
     )
     .setFooter("Made by iamtheyammer and SweetPlum | d.craft Tournament Bot");
 }
 
-function inviteExpiredEmbed(tag: string, name: string): MessageEmbed {
-  return new MessageEmbed()
-    .setColor("#ff0000")
-    .setTitle("Invite Expired")
-    .setDescription(
-      `Your invite to join \`[${tag}] ${name}\` has expired. Ask the leader to send another one if you think this is a mistake.`
-    )
-    .setFooter("Made by iamtheyammer and SweetPlum | d.craft Tournament Bot");
-}
 
 function cannotInviteBotEmbed(
   tag: string,

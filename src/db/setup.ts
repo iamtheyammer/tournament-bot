@@ -90,6 +90,7 @@ async function setupTeamsTable(
     tableBuilder.text("name").notNullable();
     tableBuilder.text("tag").unique().notNullable();
     tableBuilder.unique(["tournament_id", "tag"]);
+    tableBuilder.text("role_id").unique();
     tableBuilder.text("description");
     tableBuilder.boolean("public").notNullable().defaultTo(false);
     tableBuilder.timestamp("inserted_at").defaultTo(trx.fn.now()).notNullable();

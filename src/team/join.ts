@@ -1,34 +1,34 @@
 import { Message, MessageEmbed } from "discord.js";
-import { teams } from "../index";
+import { listTeams } from "../db/teams";
+import { deleteTeamInvite, listTeamInvites } from "../db/team_invites";
+import {
+  insertTeamMemberships,
+  listTeamMemberships,
+} from "../db/team_memberships";
+import { Args } from "../index";
 
-export default async function join(
-  msg: Message,
-  args: Array<string>
-): Promise<void> {
-  const index = teams.findIndex((team) => team.members.includes(msg.author.id));
-  const tagIndex = teams.findIndex(
-    (team) => team.tag.toLowerCase() === args[2].toLowerCase()
-  );
-  if (index !== -1) {
-    msg.channel.send(
-      alreadyInTeamEmbed(teams[tagIndex].tag, teams[tagIndex].name)
-    );
+export default async function join(msg: Message, args: Args): Promise<void> {
+  const teamMembers = await listTeamMemberships({ user_id: msg.author.id });
+  const team = await listTeams({ id: teamMembers[0].id });
+  const requestedTeam = await listTeams({
+    tag: args.splitCommand[2].toUpperCase(),
+  });
+  if (teamMembers.length) {
+    msg.channel.send(alreadyInTeamEmbed(team[0].tag, team[0].name));
     return;
   }
-
-  if (!teams[tagIndex].invites.includes(msg.author.id)) {
-    msg.channel.send(
-      notInvitedEmbed(teams[tagIndex].tag, teams[tagIndex].name)
-    );
+  const inviteList = await listTeamInvites({ invited_user_id: msg.author.id });
+  if (!inviteList.length || inviteList[0].team_id !== requestedTeam[0].id) {
+    msg.channel.send(notInvitedEmbed(team[0].tag, team[0].name));
   } else {
-    teams[tagIndex].invites.splice(
-      teams[tagIndex].invites.findIndex((member) => member === msg.author.id),
-      1
-    );
-    teams[tagIndex].members.push(msg.author.id);
-    msg.channel.send(
-      joinedTeamEmbed(teams[tagIndex].tag, teams[tagIndex].name)
-    );
+    await deleteTeamInvite({ invited_user_id: parseInt(msg.author.id) });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const teamJoinId = await insertTeamMemberships({
+      user_id: msg.author.id,
+      team_id: requestedTeam[0].id,
+      tournament_id: requestedTeam[0].tournament_id,
+    });
+    msg.channel.send(joinedTeamEmbed(team[0].tag, team[0].name));
   }
 }
 

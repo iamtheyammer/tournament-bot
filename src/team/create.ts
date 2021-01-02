@@ -1,44 +1,56 @@
 import { Message, MessageEmbed } from "discord.js";
-import { teams, teamCreating, prefix } from "../index";
+import { TeamArgs } from ".";
+import { insertTeam, updateTeam } from "../db/teams";
+import { prefix } from "../index";
+import { isValidTeamTag } from "../util/regex";
 
 export default async function create(
   msg: Message,
-  args: Array<string>,
-  argsCapital: Array<string>
+  args: TeamArgs
 ): Promise<void> {
-  const teamData: Array<string> = argsCapital;
-  for (let i = 0; i < 2; i++) {
-    teamData.shift();
+  if (args.splitCommand.length < 4) {
+    // error missing argument
   }
-  const teamTag = teamData[0].toUpperCase();
-  const teamTest = teamTag.split("");
-  teamData.shift();
-  const teamName = teamData.join(" ");
-  if (teams.findIndex((arg) => arg.members.includes(msg.author.id)) !== -1) {
-    msg.channel.send(alreadyInTeamEmbed(teamTag, teamName));
-    return;
-  }
-  if (teams.findIndex((arg) => arg.tag === teamTag) !== -1) {
-    msg.channel.send(tagAlreadyExistsEmbed(teamTag, teamName));
-    return;
-  }
-  if (!/^[A-z0-9]{1,6}$/.test(teamTag)) {
+
+  const teamTag = args.splitCommand[2];
+  const teamName = args.splitCommand[3];
+  const teamDescription =
+    args.splitCommand.length > 3 ? args.splitCommand[4] : "";
+
+  if (!isValidTeamTag(teamTag)) {
     msg.channel.send(notAlphaNumericEmbed(teamTag, teamName));
     return;
   }
+  if (args.team) {
+    msg.channel.send(alreadyInTeamEmbed(teamTag, teamName));
+    return;
+  }
+  let teamId: number;
+  try {
+    teamId = await insertTeam({
+      // TODO: FIX
+      tournament_id: 1,
+      name: teamName,
+      tag: teamTag,
+      description: teamDescription,
+    });
+  } catch (e) {
+    console.log(e);
+    msg.channel.send(tagAlreadyExistsEmbed(teamTag, teamName));
+  }
+
+  // we know that team creation was a success
+
+  // create discord role
+  // create category
+  // create channels
+  // set channel permissions
+
+  const discordRoleId = "await msg.guild.roles.create()";
+
+  await updateTeam({ role_id: discordRoleId, where: { id: teamId } });
+
   msg.channel.send(teamCreationConfirmEmbed(teamTag, teamName, prefix));
-  teamCreating.push({
-    tag: teamTag,
-    name: teamName,
-    leader: msg.author.id,
-    members: [msg.author.id],
-  });
-  setTimeout(() => {
-    teamCreating.splice(
-      teamCreating.findIndex((arg) => arg.leader === msg.author.id),
-      1
-    );
-  }, 30000);
 }
 
 function tagAlreadyExistsEmbed(tag: string, name: string): MessageEmbed {

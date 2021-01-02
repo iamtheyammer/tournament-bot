@@ -1,10 +1,11 @@
 import db, { DBQueryMeta, handleMeta } from "./index";
 
-interface DBTeam {
+export interface DBTeam {
   id: number;
   tournament_id: number;
   name: string;
   tag: string;
+  role_id: string;
   description?: string;
   public: boolean;
   inserted_at: Date;
@@ -14,18 +15,27 @@ interface DBTeamInsertRequest {
   tournament_id: number;
   name: string;
   tag: string;
+  role_id?: string;
   description?: string;
   public?: boolean;
 }
 
 // returns the newly created team ID
 export async function insertTeam(req: DBTeamInsertRequest): Promise<number> {
-  const { tournament_id, name, tag, description, public: isPublic } = req;
+  const {
+    tournament_id,
+    name,
+    tag,
+    role_id,
+    description,
+    public: isPublic,
+  } = req;
 
   const row = {
     tournament_id,
     name,
     tag,
+    role_id,
   };
 
   if (description) {
@@ -45,6 +55,7 @@ interface DBTeamUpdateRequest {
   tournament_id?: number;
   tag?: string;
   name?: string;
+  role_id?: string;
   description?: string;
   public?: boolean;
   where: {
@@ -70,6 +81,10 @@ export async function updateTeam(req: DBTeamUpdateRequest): Promise<void> {
     update["name"] = req.name;
   }
 
+  if (req.role_id) {
+    update["role_id"] = req.role_id;
+  }
+
   if (req.description) {
     update["description"] = req.description;
   }
@@ -86,8 +101,9 @@ export async function updateTeam(req: DBTeamUpdateRequest): Promise<void> {
 interface DBTeamDeleteRequest {
   id?: number;
   tournament_id?: number;
-  tag?: number;
+  tag?: string;
   name?: string;
+  role_id?: string;
   public?: boolean;
 }
 
@@ -98,9 +114,11 @@ export async function deleteTeams(req: DBTeamDeleteRequest): Promise<void> {
 interface DBListTeamsRequest {
   id?: number;
   tournament_id?: number;
-  tag?: number;
+  tag?: string;
   name?: string;
+  role_id?: string;
   public?: boolean;
+  user_id?: string;
   meta?: DBQueryMeta;
 }
 
@@ -123,8 +141,18 @@ export async function listTeams(req: DBListTeamsRequest): Promise<DBTeam[]> {
     query.where({ name: req.name });
   }
 
+  if (req.role_id) {
+    query.where({ name: req.role_id });
+  }
+
   if (req.public) {
     query.where({ public: req.public });
+  }
+
+  if (req.user_id) {
+    query
+      .join("team_memberships", "teams.id", "team_memberships.team_id")
+      .where({ "team_memberships.user_id": req.user_id });
   }
 
   handleMeta(query, req.meta);

@@ -1,12 +1,12 @@
 import * as Discord from "discord.js";
 import * as chalk from "chalk";
+import { splitargs } from "./util/splitargs";
 import ignHandler from "./ign";
 import teamHandler from "./team";
 import { setupDatabase } from "./db/setup";
+import { DBUser, listUsers } from "./db/users";
 const client = new Discord.Client();
 const token = process.env.DISCORD_TOKEN;
-export const teamCreating: Array<team> = [];
-export const teams: Array<fullTeam> = [];
 
 export const hypixelApiKey = process.env.HYPIXEL_API_KEY;
 export const prefix = "!";
@@ -18,50 +18,42 @@ client.on("ready", () => {
   client.user.setActivity("too much bedwars", { type: "PLAYING" });
 });
 
-export interface playerIGN {
-  tag: string;
-  id: string;
-  ign: string;
-}
+export type Args = {
+  splitCommand: string[];
+  splitCommandLower: string[];
+  user?: DBUser[];
+};
 
-export type Args = Array<string>;
-export interface fullTeam {
-  tag: string;
-  name: string;
-  description: string;
-  leader: string;
-  members: Array<string>;
-  invites: Array<string>;
-}
+/*
+const currentTournaments = await listTournaments({ meta: { active_only: true }});
+const currentTournament = currentTournaments[0];
 
-export interface team {
-  tag: string;
-  name: string;
-  leader: string;
-  members: Array<string>;
-}
-
-// Data Initialization
+// set it so that if we create a new tournament, this updates
+// i'd also add a "update current tournament" command
+*/
 
 client.on("message", async (msg) => {
   if (msg.author.bot || !msg.content.startsWith(prefix)) return;
-  const args = msg.content
-    .split(" ")
-    .map((arg, idx) =>
-      idx === 0 ? arg.slice(1).toLowerCase() : arg.toLowerCase()
-    );
-  const argsCapital = msg.content.split(" ");
-  switch (args[0]) {
+  const splitCommand = splitargs(msg.content).map((a, idx) =>
+    idx === 0 ? a.slice(1) : a
+  );
+  const splitCommandLower = splitCommand.map((c) => c.toLowerCase());
+
+  const user = await listUsers({ discord_id: msg.author.id });
+
+  const args: Args = {
+    splitCommand,
+    splitCommandLower,
+    user,
+  };
+
+  switch (args.splitCommandLower[0]) {
     case "ign": {
       await ignHandler(msg, args);
       break;
     }
     case "team": {
-      if (playerIGNs.findIndex((data) => data.id === msg.author.id) === -1) {
-        msg.channel.send(noIGNLinked(prefix));
-        return;
-      }
-      teamHandler(msg, args, argsCapital);
+      await teamHandler(msg, args);
       break;
     }
   }

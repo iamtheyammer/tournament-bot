@@ -48,13 +48,23 @@ interface DBTeamMembershipListRequest {
   tournament_id?: number;
   invite_id?: number;
   type?: string;
+  team_tag?: string;
   meta?: DBQueryMeta;
 }
 
 export async function listTeamMemberships(
   req: DBTeamMembershipListRequest
 ): Promise<DBTeamMembership[]> {
-  const { id, user_id, team_id, tournament_id, invite_id, type, meta } = req;
+  const {
+    id,
+    user_id,
+    team_id,
+    tournament_id,
+    invite_id,
+    type,
+    team_tag,
+    meta,
+  } = req;
 
   const query = db("team_memberships");
   const search = {};
@@ -81,6 +91,11 @@ export async function listTeamMemberships(
 
   if (type) {
     search["type"] = type;
+  }
+
+  if (team_tag) {
+    query.join("teams", "team_memberships.id", "teams.id");
+    search["teams.tag"] = team_tag;
   }
 
   query.where(search);
