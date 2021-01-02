@@ -27,6 +27,10 @@ These commands are meant to assist users in linking their discord profiles to Hy
 | ---------- | ------------------------------------------------ | ------- | ----------------------------------------------------------------------- |
 | Discord.js | [Link](https://www.npmjs.com/package/discord.js) | v12.5.1 | Connect to Discord and send messages, get data from Discord users, etc. |
 | Axios      | [Link](https://www.npmjs.com/package/axios)      | v0.21.1 | Generate API requests and get information from Hypixel                  |
+| Chalk      | [Link](https://www.npmjs.com/package/chalk)      | v4.1.0 | Make colored console messages                  |
+| Knex       | [Link](https://www.npmjs.com/package/knex)      | v0.21.15 | Create and modify SQL tables                   |
+| PG         | [Link](https://www.npmjs.com/package/pg)      | v8.5.1 | Knex dependency                  |
+| Nodemon    | [Link](https://www.npmjs.com/package/nodemon)      | v2.0.4 | Automatically restart bot whenever changes are made                  |
 
 ## Goals/ideas to implement
 
