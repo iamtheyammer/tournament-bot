@@ -63,6 +63,7 @@ export default async function createTeam(
     },
     trx
   );
+  await trx.commit();
 }
 
 // Create Transaction done
@@ -72,5 +73,5 @@ export default async function createTeam(
 // Create category (save id and name to team tag + name) done
 // Create channels (with perms so only team members can view) done
 // Add player to role done
-// Update database role ID and category ID
+// Update database role ID and category ID done
 // Commit Transaction
