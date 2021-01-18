@@ -1,6 +1,7 @@
 import { Message } from "discord.js";
 import db from "../db/index";
 import { insertTeam } from "../db/teams";
+import { insertTeamMemberships } from "../db/team_memberships";
 import { DBTournament } from "../db/tournaments";
 
 export default async function createTeam(
@@ -60,6 +61,15 @@ export default async function createTeam(
       description: teamDescription,
       role_id: newRole.id,
       category_id: teamCategory.id,
+    },
+    trx
+  );
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const teamMembershipId = await insertTeamMemberships(
+    {
+      user_id: msg.author.id,
+      team_id: teamId,
+      tournament_id: 1,
     },
     trx
   );

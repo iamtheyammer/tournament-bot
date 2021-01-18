@@ -1,3 +1,4 @@
+import { Transaction } from "knex";
 import db, { DBQueryMeta } from "./index";
 
 export interface DBTeamMembership {
@@ -19,9 +20,10 @@ interface DBTeamMembershipInsertRequest {
 }
 
 export async function insertTeamMemberships(
-  req: DBTeamMembershipInsertRequest | DBTeamMembershipInsertRequest[]
+  req: DBTeamMembershipInsertRequest | DBTeamMembershipInsertRequest[],
+  database: Transaction = db
 ): Promise<number> {
-  const rows = await db("team_memberships").insert(req).returning("id");
+  const rows = await database("team_memberships").insert(req).returning("id");
 
   return rows[0];
 }
