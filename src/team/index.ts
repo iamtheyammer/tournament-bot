@@ -6,6 +6,7 @@ import create from "./create";
 import invite from "./invite";
 import { DBTeamMembership, listTeamMemberships } from "../db/team_memberships";
 import { DBTournament, listTournaments } from "../db/tournaments";
+import { errorEmbed } from "../util/embeds";
 
 export interface TeamArgs extends Args {
   teamMembership?: DBTeamMembership;
@@ -24,7 +25,13 @@ export default async function teamHandler(
   const tournaments = await listTournaments({ meta: { active_only: true } });
 
   if (!tournaments.length) {
-    // something error no team commands allowed whatever
+    await msg.channel.send(
+      errorEmbed()
+        .setTitle("No current tournament")
+        .setDescription(
+          "There isn't a tournament right now. Check our announcements channels for more info!"
+        )
+    );
     return;
   }
 
@@ -35,7 +42,10 @@ export default async function teamHandler(
     tournament_id: activeTournament.id,
   });
 
-  const teamArgs: TeamArgs = args;
+  const teamArgs: TeamArgs = {
+    ...args,
+    currentTournament: activeTournament,
+  };
 
   if (userTeamMembership.length) {
     teamArgs.teamMembership = userTeamMembership[0];
@@ -43,7 +53,7 @@ export default async function teamHandler(
 
   switch (args.splitCommandLower[1]) {
     case "create": {
-      await create(msg, args);
+      await create(msg, teamArgs);
       break;
     }
     case "invite": {
@@ -51,12 +61,20 @@ export default async function teamHandler(
       break;
     }
     case "join": {
-      await join(msg, args);
+      await join(msg, teamArgs);
       break;
     }
     case "info": {
-      await info(msg, args);
+      await info(msg, teamArgs);
       break;
+    }
+    default: {
+      await msg.channel.send(
+        errorEmbed()
+          .setTitle("Unknown command")
+          .setDescription("Try `!team help` for more information.")
+      );
+      return;
     }
   }
 }

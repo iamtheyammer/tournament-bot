@@ -2,7 +2,7 @@ import { Message, MessageEmbed } from "discord.js";
 import { TeamArgs } from ".";
 import createTeam from "../bundles/create_team";
 import { listTeams } from "../db/teams";
-import { errorEmbed, infoEmbed } from "../util/embeds";
+import { errorEmbed, infoEmbed, successEmbed } from "../util/embeds";
 import { isValidTeamTag } from "../util/regex";
 
 export default async function create(
@@ -11,17 +11,25 @@ export default async function create(
 ): Promise<void> {
   if (args.splitCommand.length < 4) {
     // error missing argument
+    await msg.channel.send(
+      errorEmbed()
+        .setTitle("Missing arguments")
+        .setDescription(
+          'Use `!team create TAG "Team Name" "Team Description (optional)" to create your team!'
+        )
+    );
     return;
   }
+
   const teamTag = args.splitCommand[2].toUpperCase();
   const teamName = args.splitCommand[3];
   const teamList = await listTeams({ tag: teamTag });
   if (teamList.length) {
     msg.channel.send(
       errorEmbed()
-        .setTitle("Team Creation Not Allowed")
+        .setTitle("Tag Taken")
         .setDescription(
-          `You cannot create \`[${teamTag}] ${teamName}\` because another team has already taken that tag.`
+          `You cannot create \`[${teamTag}] ${teamName}\` because \`${teamList[0].tag} ${teamList[0].name}\` has already taken that tag.`
         )
     );
   }
@@ -72,12 +80,30 @@ export default async function create(
     return;
   }
 
-  await createTeam(
-    msg,
-    args.currentTournament,
-    msg.author.id,
-    teamName,
-    teamTag
+  try {
+    await createTeam(
+      msg,
+      args.currentTournament,
+      msg.author.id,
+      teamName,
+      teamTag
+    );
+  } catch (e) {
+    await msg.channel.send(
+      errorEmbed()
+        .setTitle("Error creating team")
+        .setDescription(
+          "There was an error creating your team. Ask an admin to check the logs for more info.\nAnything created has been undone."
+        )
+    );
+    return;
+  }
+
+  await msg.channel.send(
+    successEmbed().setTitle("Team successfully created!").setDescription(
+      `Team ${teamName} has been created!\nUse \`!team invite @SomeoneElse\` to invite others, 
+        or use \`!team info\` to see your shiny new team!`
+    )
   );
 }
 

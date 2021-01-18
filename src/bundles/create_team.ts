@@ -1,4 +1,10 @@
-import { Message } from "discord.js";
+import {
+  CategoryChannel,
+  Message,
+  Role,
+  TextChannel,
+  VoiceChannel,
+} from "discord.js";
 import db from "../db/index";
 import { insertTeam } from "../db/teams";
 import { insertTeamMemberships } from "../db/team_memberships";
@@ -14,74 +20,118 @@ export default async function createTeam(
 ): Promise<void> {
   const trx = await db.transaction();
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-
   if (!msg.guild.available) throw "Guild not available!";
 
-  const newRole = await msg.guild.roles.create({
-    data: { name: `[${teamTag}] ${teamName}` },
-  });
+  const rollbackStack = [trx.rollback];
+  const rollback = (errorLocation: string) =>
+    Promise.all(
+      rollbackStack.map((f, i) =>
+        i > 0 ? f(`Error at ${errorLocation}`) : f()
+      )
+    );
 
-  const teamCategory = await msg.guild.channels.create(`${teamName}`, {
-    type: "category",
-    permissionOverwrites: [
-      { id: msg.guild.roles.everyone.id, deny: ["VIEW_CHANNEL"] },
-      { id: newRole.id, allow: ["VIEW_CHANNEL"] },
-    ],
-  });
+  let teamRole: Role;
+  try {
+    teamRole = await msg.guild.roles.create({
+      data: { name: `[${teamTag}] ${teamName}`, hoist: true },
+    });
+    rollbackStack.push(teamRole.delete);
+  } catch (e) {
+    await rollback("team role creation");
+    throw e;
+  }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const teamChat = await msg.guild.channels
-    .create(`${teamName}`, {
+  let teamCategory: CategoryChannel;
+  try {
+    teamCategory = await msg.guild.channels.create(`${teamName}`, {
+      type: "category",
+      permissionOverwrites: [
+        { id: msg.guild.roles.everyone.id, deny: ["VIEW_CHANNEL"] },
+        { id: teamRole.id, allow: ["VIEW_CHANNEL"] },
+      ],
+    });
+    rollbackStack.push(teamCategory.delete);
+  } catch (e) {
+    await rollback("team category creation");
+    throw e;
+  }
+
+  let teamTextChannel: TextChannel;
+  try {
+    teamTextChannel = await msg.guild.channels.create(`${teamName}`, {
       type: "text",
       permissionOverwrites: [
         { id: msg.guild.roles.everyone.id, deny: ["VIEW_CHANNEL"] },
-        { id: newRole.id, allow: ["VIEW_CHANNEL"] },
+        { id: teamRole.id, allow: ["VIEW_CHANNEL"] },
       ],
-    })
-    .then((channel) => channel.setParent(teamCategory));
+    });
+    await teamTextChannel.setParent(teamCategory);
+    rollbackStack.push(teamTextChannel.delete);
+  } catch (e) {
+    await rollback("team text channel creation");
+    throw e;
+  }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const teamVC = await msg.guild.channels
-    .create(`${teamName}`, {
+  let teamVoiceChannel: VoiceChannel;
+  try {
+    teamVoiceChannel = await msg.guild.channels.create(`${teamName}`, {
       type: "voice",
       permissionOverwrites: [
         { id: msg.guild.roles.everyone.id, deny: ["VIEW_CHANNEL"] },
-        { id: newRole.id, allow: ["VIEW_CHANNEL"] },
+        { id: teamRole.id, allow: ["VIEW_CHANNEL"] },
       ],
-    })
-    .then((channel) => channel.setParent(teamCategory));
-  msg.member.roles.add(newRole);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const teamId = await insertTeam(
-    {
-      tournament_id: 1,
-      name: teamName,
-      tag: teamTag,
-      description: teamDescription,
-      role_id: newRole.id,
-      category_id: teamCategory.id,
-    },
-    trx
-  );
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const teamMembershipId = await insertTeamMemberships(
-    {
-      user_id: msg.author.id,
-      team_id: teamId,
-      tournament_id: 1,
-    },
-    trx
-  );
-  await trx.commit();
-}
+    });
+    await teamVoiceChannel.setParent(teamCategory);
+    rollbackStack.push(teamVoiceChannel.delete);
+  } catch (e) {
+    await rollback("team voice channel creation");
+    throw e;
+  }
 
-// Create Transaction done
-// Insert Team done
-// If errors rollback transaction
-// Create role (colors and set perms) done
-// Create category (save id and name to team tag + name) done
-// Create channels (with perms so only team members can view) done
-// Add player to role done
-// Update database role ID and category ID done
-// Commit Transaction
+  try {
+    await msg.member.roles.add(teamRole);
+    // no rollback needed because role is removed from user when role is deleted
+  } catch (e) {
+    await rollback("add role to leader");
+    throw e;
+  }
+
+  let teamId: number;
+  try {
+    teamId = await insertTeam(
+      {
+        tournament_id: currentTournament.id,
+        name: teamName,
+        tag: teamTag,
+        description: teamDescription,
+        role_id: teamRole.id,
+        category_id: teamTextChannel.id,
+      },
+      trx
+    );
+  } catch (e) {
+    await rollback("insert team to database");
+    throw e;
+  }
+
+  try {
+    await insertTeamMemberships(
+      {
+        user_id: msg.author.id,
+        team_id: teamId,
+        tournament_id: currentTournament.id,
+      },
+      trx
+    );
+  } catch (e) {
+    await rollback("insert team membership to database");
+    throw e;
+  }
+
+  try {
+    await trx.commit();
+  } catch (e) {
+    await rollback("commit database transaction");
+    throw e;
+  }
+}
