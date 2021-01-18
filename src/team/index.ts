@@ -4,7 +4,7 @@ import info from "./info";
 import join from "./join";
 import create from "./create";
 import invite from "./invite";
-import { DBTeamMembership, listTeamMemberships } from "../db/team_memberships"
+import { DBTeamMembership, listTeamMemberships } from "../db/team_memberships";
 import { DBTournament, listTournaments } from "../db/tournaments";
 
 export interface TeamArgs extends Args {
@@ -21,7 +21,7 @@ export default async function teamHandler(
     return;
   }
 
-  const tournaments = await listTournaments({ meta:{ active_only: true} });
+  const tournaments = await listTournaments({ meta: { active_only: true } });
 
   if (!tournaments.length) {
     // something error no team commands allowed whatever
@@ -30,8 +30,11 @@ export default async function teamHandler(
 
   const activeTournament = tournaments[0];
 
-  const userTeamMembership = await listTeamMemberships({ user_id: msg.author.id, tournament_id: activeTournament.id})
-  
+  const userTeamMembership = await listTeamMemberships({
+    user_id: msg.author.id,
+    tournament_id: activeTournament.id,
+  });
+
   const teamArgs: TeamArgs = args;
 
   if (userTeamMembership.length) {
