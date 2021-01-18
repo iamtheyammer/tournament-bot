@@ -1,3 +1,4 @@
+import { Transaction } from "knex";
 import db, { DBQueryMeta, handleMeta } from "./index";
 
 export interface DBTeam {
@@ -6,6 +7,7 @@ export interface DBTeam {
   name: string;
   tag: string;
   role_id: string;
+  category_id: string;
   description?: string;
   public: boolean;
   inserted_at: Date;
@@ -16,17 +18,22 @@ interface DBTeamInsertRequest {
   name: string;
   tag: string;
   role_id?: string;
+  category_id?: string;
   description?: string;
   public?: boolean;
 }
 
 // returns the newly created team ID
-export async function insertTeam(req: DBTeamInsertRequest): Promise<number> {
+export async function insertTeam(
+  req: DBTeamInsertRequest,
+  database: Transaction = db
+): Promise<number> {
   const {
     tournament_id,
     name,
     tag,
     role_id,
+    category_id,
     description,
     public: isPublic,
   } = req;
@@ -36,6 +43,7 @@ export async function insertTeam(req: DBTeamInsertRequest): Promise<number> {
     name,
     tag,
     role_id,
+    category_id,
   };
 
   if (description) {
@@ -46,7 +54,7 @@ export async function insertTeam(req: DBTeamInsertRequest): Promise<number> {
     row["public"] = isPublic;
   }
 
-  const rows = await db("teams").insert(row).returning("id");
+  const rows = await database("teams").insert(row).returning("id");
 
   return rows[0];
 }
@@ -56,6 +64,7 @@ interface DBTeamUpdateRequest {
   tag?: string;
   name?: string;
   role_id?: string;
+  category_id?: string;
   description?: string;
   public?: boolean;
   where: {
@@ -64,8 +73,11 @@ interface DBTeamUpdateRequest {
   };
 }
 
-export async function updateTeam(req: DBTeamUpdateRequest): Promise<void> {
-  const query = db("teams").where(req.where);
+export async function updateTeam(
+  req: DBTeamUpdateRequest,
+  database: Transaction = db
+): Promise<void> {
+  const query = database("teams").where(req.where);
 
   const update = {};
 
@@ -83,6 +95,10 @@ export async function updateTeam(req: DBTeamUpdateRequest): Promise<void> {
 
   if (req.role_id) {
     update["role_id"] = req.role_id;
+  }
+
+  if (req.category_id) {
+    update["category_id"] = req.category_id;
   }
 
   if (req.description) {
@@ -104,11 +120,15 @@ interface DBTeamDeleteRequest {
   tag?: string;
   name?: string;
   role_id?: string;
+  category_id?: string;
   public?: boolean;
 }
 
-export async function deleteTeams(req: DBTeamDeleteRequest): Promise<void> {
-  await db("teams").where(req).del();
+export async function deleteTeams(
+  req: DBTeamDeleteRequest,
+  database: Transaction = db
+): Promise<void> {
+  await database("teams").where(req).del();
 }
 
 interface DBListTeamsRequest {
@@ -117,13 +137,17 @@ interface DBListTeamsRequest {
   tag?: string;
   name?: string;
   role_id?: string;
+  category_id?: string;
   public?: boolean;
   user_id?: string;
   meta?: DBQueryMeta;
 }
 
-export async function listTeams(req: DBListTeamsRequest): Promise<DBTeam[]> {
-  const query = db("teams");
+export async function listTeams(
+  req: DBListTeamsRequest,
+  database: Transaction = db
+): Promise<DBTeam[]> {
+  const query = database("teams");
 
   if (req.id) {
     query.where({ id: req.id });
@@ -143,6 +167,10 @@ export async function listTeams(req: DBListTeamsRequest): Promise<DBTeam[]> {
 
   if (req.role_id) {
     query.where({ name: req.role_id });
+  }
+
+  if (req.category_id) {
+    query.where({ name: req.category_id });
   }
 
   if (req.public) {

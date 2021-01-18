@@ -1,6 +1,8 @@
 import * as Discord from "discord.js";
 import * as chalk from "chalk";
-import { splitargs } from "./util/splitargs";
+// commonjs only
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const splitargs = require("splitargs");
 import ignHandler from "./ign";
 import teamHandler from "./team";
 import { setupDatabase } from "./db/setup";
@@ -21,7 +23,7 @@ client.on("ready", () => {
 export type Args = {
   splitCommand: string[];
   splitCommandLower: string[];
-  user?: DBUser[];
+  user?: DBUser;
 };
 
 /*
@@ -39,12 +41,12 @@ client.on("message", async (msg) => {
   );
   const splitCommandLower = splitCommand.map((c) => c.toLowerCase());
 
-  const user = await listUsers({ discord_id: msg.author.id });
+  const users = await listUsers({ discord_id: msg.author.id });
 
   const args: Args = {
     splitCommand,
     splitCommandLower,
-    user,
+    user: users.length && users[0],
   };
 
   switch (args.splitCommandLower[0]) {

@@ -1,5 +1,5 @@
 export function splitargs(content: string): Array<string> {
-  const split: string[][] | string[] = content
+  const split: Array<Array<string>> = content
     .split(" ")
     .map((arg) => arg.split('"'));
   let inQuotes = false;
@@ -30,7 +30,7 @@ export function splitargs(content: string): Array<string> {
 
   // Repair message
 
-  const newSplit: Array<string> | string = [];
+  const newSplit: Array<string> = [];
   let escaped = false;
   let onSplitNum = 0;
   for (let i = 0; i < split.length; i++) {

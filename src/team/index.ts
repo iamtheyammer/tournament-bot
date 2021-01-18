@@ -4,43 +4,41 @@ import info from "./info";
 import join from "./join";
 import create from "./create";
 import invite from "./invite";
-import { listUsers } from "../db/users";
-import { DBTeam, listTeams } from "../db/teams";
+import { DBTeamMembership, listTeamMemberships } from "../db/team_memberships"
+import { DBTournament, listTournaments } from "../db/tournaments";
 
 export interface TeamArgs extends Args {
-  team?: DBTeam;
+  teamMembership?: DBTeamMembership;
+  currentTournament?: DBTournament;
 }
 
 export default async function teamHandler(
   msg: Message,
   args: Args
 ): Promise<void> {
-  const users = await listUsers({ discord_id: msg.author.id });
-  if (!users.length || !users[0].minecraft_uuid) {
+  if (!args.user || !args.user.minecraft_uuid) {
     msg.channel.send(noIGNLinked(prefix));
     return;
   }
-  // get the team
-  const teams = await listTeams({
-    user_id: msg.author.id,
-    meta: { order_by: { exp: "team_memberships.inserted_at", dir: "DESC" } },
-  });
 
+  const tournaments = await listTournaments({ meta:{ active_only: true} });
+
+  if (!tournaments.length) {
+    // something error no team commands allowed whatever
+    return;
+  }
+
+  const activeTournament = tournaments[0];
+
+  const userTeamMembership = await listTeamMemberships({ user_id: msg.author.id, tournament_id: activeTournament.id})
+  
   const teamArgs: TeamArgs = args;
 
-  if (teams.length) {
-    teamArgs.team = teams[0];
+  if (userTeamMembership.length) {
+    teamArgs.teamMembership = userTeamMembership[0];
   }
 
   switch (args.splitCommandLower[1]) {
-    // case "confirm": {
-    //   await confirm(msg, index);
-    //   break;
-    // }
-    // case "deny": {
-    //   await deny(msg, index);
-    //   break;
-    // }
     case "create": {
       await create(msg, args);
       break;

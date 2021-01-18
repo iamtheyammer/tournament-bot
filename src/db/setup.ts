@@ -64,6 +64,7 @@ async function setupTournamentsTable(
     tableBuilder.text("gamemode").notNullable();
     tableBuilder.timestamp("opens_at");
     tableBuilder.timestamp("starts_at");
+    tableBuilder.text("participant_role_id").notNullable();
     tableBuilder.timestamp("inserted_at").defaultTo(trx.fn.now()).notNullable();
   });
 
@@ -91,6 +92,7 @@ async function setupTeamsTable(
     tableBuilder.text("tag").unique().notNullable();
     tableBuilder.unique(["tournament_id", "tag"]);
     tableBuilder.text("role_id").unique();
+    tableBuilder.text("category_id").unique();
     tableBuilder.text("description");
     tableBuilder.boolean("public").notNullable().defaultTo(false);
     tableBuilder.timestamp("inserted_at").defaultTo(trx.fn.now()).notNullable();

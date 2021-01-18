@@ -1,6 +1,6 @@
 import db, { DBQueryMeta } from "./index";
 
-interface DBTeamMembership {
+export interface DBTeamMembership {
   id: number;
   user_id: string;
   team_id: number;
