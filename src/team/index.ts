@@ -15,6 +15,7 @@ import { errorEmbed, infoEmbed } from "../util/embeds";
 import leave from "./leave";
 import { transcode } from "buffer";
 import transfer from "./transfer";
+import kick from "./kick";
 
 export interface TeamArgs extends Args {
   teamMembership?: DBTeamMembership;
@@ -85,6 +86,11 @@ export default async function teamHandler(
     case "transfer": {
       if (!(await requireLeaderMembership(msg, teamArgs))) return;
       await transfer(msg, teamArgs);
+      break;
+    }
+    case "kick": {
+      if (!(await requireLeaderMembership(msg, teamArgs))) return;
+      await kick(msg, teamArgs);
       break;
     }
     default: {
