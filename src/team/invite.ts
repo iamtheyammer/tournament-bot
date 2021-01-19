@@ -67,6 +67,7 @@ export default async function invite(
   const existingInvites = await listTeamInvites({
     invited_user_id: inviteesIds,
     team_id: team.id,
+    retracted: false,
   });
   if (existingInvites.length) {
     await msg.channel.send(

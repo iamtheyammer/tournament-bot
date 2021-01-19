@@ -13,17 +13,19 @@ export default async function info(
 
   // if a team tag is specified, use that
   if (args.splitCommand[2]) {
-    const teams = await listTeams({ tag: args.splitCommand[2] });
+    const specifiedTag = args.splitCommandLower[2].toUpperCase();
+
+    const teams = await listTeams({ tag: specifiedTag });
     if (!teams.length) {
       await msg.channel.send(
         errorEmbed()
           .setTitle("Invalid team tag")
-          .setDescription(
-            `A team with tag \`${args.splitCommand[2]}\` doesn't exist.`
-          )
+          .setDescription(`A team with tag \`${specifiedTag}\` doesn't exist.`)
       );
       return;
     }
+
+    team = teams[0];
     memberships = await listTeamMemberships({ team_id: teams[0].id });
   } else {
     // otherwise, use the calling member's team

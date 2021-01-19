@@ -12,6 +12,7 @@ import invite from "./invite";
 import { DBTeamMembership, listTeamMemberships } from "../db/team_memberships";
 import { DBTournament, listTournaments } from "../db/tournaments";
 import { errorEmbed, infoEmbed } from "../util/embeds";
+import leave from "./leave";
 
 export interface TeamArgs extends Args {
   teamMembership?: DBTeamMembership;
@@ -69,6 +70,10 @@ export default async function teamHandler(
       await join(msg, teamArgs);
       break;
     }
+    case "leave": {
+      await leave(msg, teamArgs);
+      break;
+    }
     case "info": {
       await info(msg, teamArgs);
       break;
@@ -97,7 +102,7 @@ export function noIGNLinked(prefix: string): MessageEmbed {
 export async function getTeamTextChannel(
   msg: Message,
   teamCategoryId: string
-): TextChannel {
+): Promise<TextChannel> {
   const category = msg.guild.channels.resolve(
     teamCategoryId
   ) as CategoryChannel;
