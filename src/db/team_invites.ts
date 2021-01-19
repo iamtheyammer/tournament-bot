@@ -1,4 +1,5 @@
 import db, { DBQueryMeta, handleMeta } from "./index";
+import { Transaction } from "knex";
 
 interface DBTeamInvite {
   id: number;
@@ -27,7 +28,7 @@ export async function insertTeamInvite(
 }
 
 interface DBTeamInviteUpdateRequest {
-  retracted?: string;
+  retracted?: boolean;
   note?: string;
   expires_at?: Date;
   where: {
@@ -40,7 +41,8 @@ interface DBTeamInviteUpdateRequest {
 }
 
 export async function updateTeamInvite(
-  req: DBTeamInviteUpdateRequest
+  req: DBTeamInviteUpdateRequest,
+  database: Transaction = db
 ): Promise<void> {
   const { retracted, note, expires_at, where } = req;
 
@@ -58,21 +60,22 @@ export async function updateTeamInvite(
     update["expires_at"] = expires_at;
   }
 
-  await db("team_invites").where(where).update(update);
+  await database("team_invites").where(where).update(update);
 }
 
 interface DBTeamInviteDeleteRequest {
   id?: number;
   team_id?: number;
-  invited_user_id?: number;
-  inviter_user_id?: number;
+  invited_user_id?: string;
+  inviter_user_id?: string;
   retracted?: boolean;
 }
 
 export async function deleteTeamInvite(
-  req: DBTeamInviteDeleteRequest
+  req: DBTeamInviteDeleteRequest,
+  database: Transaction = db
 ): Promise<void> {
-  await db("team_invites").where(req).del();
+  await database("team_invites").where(req).del();
 }
 
 interface DBTeamInviteListRequestMeta extends DBQueryMeta {
@@ -82,9 +85,10 @@ interface DBTeamInviteListRequestMeta extends DBQueryMeta {
 interface DBTeamInviteListRequest {
   id?: number;
   team_id?: number;
+  team_tag?: string;
   invited_user_id?: string | string[];
   inviter_user_id?: string;
-  retracted?: string;
+  retracted?: boolean;
 
   meta?: DBTeamInviteListRequestMeta;
 }
@@ -95,12 +99,13 @@ export async function listTeamInvites(
   const {
     id,
     team_id,
+    team_tag,
     invited_user_id,
     inviter_user_id,
     retracted,
     meta,
   } = req;
-  const query = db("team_invites");
+  const query = db("team_invites").select("team_invites.*");
 
   if (id) {
     query.where({ id });
@@ -108,6 +113,12 @@ export async function listTeamInvites(
 
   if (team_id) {
     query.where({ team_id });
+  }
+
+  if (team_tag) {
+    query
+      .join("teams", "team_invites.team_id", "teams.id")
+      .where({ "teams.tag": team_tag });
   }
 
   if (invited_user_id) {
@@ -121,7 +132,7 @@ export async function listTeamInvites(
     query.where({ inviter_user_id });
   }
 
-  if (retracted) {
+  if (typeof retracted === "boolean") {
     query.where({ retracted });
   }
 

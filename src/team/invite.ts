@@ -39,7 +39,6 @@ export default async function invite(
   }
 
   const inviteesIds = msg.mentions.users.map((u) => u.id);
-  console.log(inviteesIds);
 
   const [invitees, [team]] = await Promise.all([
     listUsers({
@@ -48,9 +47,6 @@ export default async function invite(
     }),
     listTeams({ id: args.teamMembership.team_id }),
   ]);
-
-  console.log(invitees, team);
-  console.log(msg.mentions.users);
 
   if (
     invitees.length !== msg.mentions.users.size ||

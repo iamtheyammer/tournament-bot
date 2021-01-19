@@ -1,4 +1,9 @@
-import { Message, MessageEmbed } from "discord.js";
+import {
+  CategoryChannel,
+  Message,
+  MessageEmbed,
+  TextChannel,
+} from "discord.js";
 import { prefix, Args } from "../index";
 import info from "./info";
 import join from "./join";
@@ -6,7 +11,7 @@ import create from "./create";
 import invite from "./invite";
 import { DBTeamMembership, listTeamMemberships } from "../db/team_memberships";
 import { DBTournament, listTournaments } from "../db/tournaments";
-import { errorEmbed } from "../util/embeds";
+import { errorEmbed, infoEmbed } from "../util/embeds";
 
 export interface TeamArgs extends Args {
   teamMembership?: DBTeamMembership;
@@ -87,4 +92,17 @@ export function noIGNLinked(prefix: string): MessageEmbed {
       `You cannot use any team commands because you haven't linked your discord account to Hypixel. Use \`${prefix}ign link <name>\` to link your account.`
     )
     .setFooter("Made by iamtheyammer and SweetPlum | d.craft Tournament Bot");
+}
+
+export async function getTeamTextChannel(
+  msg: Message,
+  teamCategoryId: string
+): TextChannel {
+  const category = msg.guild.channels.resolve(
+    teamCategoryId
+  ) as CategoryChannel;
+
+  return (await category.children.find(
+    (c) => c.type === "text"
+  )) as TextChannel;
 }

@@ -7,6 +7,7 @@ import ignHandler from "./ign";
 import teamHandler from "./team";
 import { setupDatabase } from "./db/setup";
 import { DBUser, listUsers } from "./db/users";
+import { errorEmbed } from "./util/embeds";
 const client = new Discord.Client();
 const token = process.env.DISCORD_TOKEN;
 
@@ -49,15 +50,26 @@ client.on("message", async (msg) => {
     user: users.length && users[0],
   };
 
-  switch (args.splitCommandLower[0]) {
-    case "ign": {
-      await ignHandler(msg, args);
-      break;
+  try {
+    switch (args.splitCommandLower[0]) {
+      case "ign": {
+        await ignHandler(msg, args);
+        break;
+      }
+      case "team": {
+        await teamHandler(msg, args);
+        break;
+      }
     }
-    case "team": {
-      await teamHandler(msg, args);
-      break;
-    }
+  } catch (e) {
+    console.error("Unexpected error:", e);
+    await msg.channel.send(
+      errorEmbed()
+        .setTitle("Unexpected Error")
+        .setDescription(
+          "We're sorry, an unexpected error occured in the processing of your command. Please follow up with admins!"
+        )
+    );
   }
 });
 

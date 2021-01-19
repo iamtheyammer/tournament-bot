@@ -115,7 +115,7 @@ export default async function createTeam(
         tag: teamTag,
         description: teamDescription,
         role_id: teamRole.id,
-        category_id: teamTextChannel.id,
+        category_id: teamCategory.id,
       },
       trx
     );
