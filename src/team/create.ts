@@ -4,6 +4,7 @@ import createTeam from "../bundles/create_team";
 import { listTeams } from "../db/teams";
 import { errorEmbed, infoEmbed, successEmbed } from "../util/embeds";
 import { isValidTeamTag } from "../util/regex";
+import discordConfirm from "../util/discord_confirm";
 
 export default async function create(
   msg: Message,
@@ -46,37 +47,20 @@ export default async function create(
     teamCreationConfirmEmbed(teamTag, teamName)
   );
 
-  await teamCreationMessage.react("❌");
-  await teamCreationMessage.react("✅");
+  const confirmation = await discordConfirm(
+    msg.author.id,
+    teamCreationMessage,
+    errorEmbed()
+      .setTitle("Team Abandoned")
+      .setDescription(
+        "You didn't confirm the team within 30 seconds of its creation."
+      ),
+    infoEmbed()
+      .setTitle("Team Creation Cancelled")
+      .setDescription("Nothing was created.")
+  );
 
-  let reactions;
-  try {
-    reactions = await teamCreationMessage.awaitReactions(
-      (reaction, user) =>
-        msg.author.id === user.id &&
-        (reaction.emoji.name === "✅" || reaction.emoji.name === "❌"),
-      {
-        time: 30000,
-        max: 1,
-        errors: ["time"],
-      }
-    );
-  } catch {
-    msg.channel.send(
-      errorEmbed()
-        .setTitle("Team Abandoned")
-        .setDescription(
-          "You didn't confirm the team within 30 seconds of its creation."
-        )
-    );
-    return;
-  }
-  if (reactions.first().emoji.name === "❌") {
-    msg.channel.send(
-      infoEmbed()
-        .setTitle("Team Creation Cancelled")
-        .setDescription("Nothing was created.")
-    );
+  if (!confirmation) {
     return;
   }
 

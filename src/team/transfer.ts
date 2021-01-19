@@ -8,6 +8,7 @@ import {
 } from "../db/team_memberships";
 import { listTeams, updateTeam } from "../db/teams";
 import info from "./info";
+import discordConfirm from "../util/discord_confirm";
 
 export default async function transfer(
   msg: Message,
@@ -83,42 +84,23 @@ export default async function transfer(
         React with ✅ to confirm transferring the team to <@${transferTo.id}>.`
     )
   );
-  await Promise.all([
-    teamTransferMessage.react("❌"),
-    teamTransferMessage.react("✅"),
-  ]);
 
-  let reactions;
-  try {
-    reactions = await teamTransferMessage.awaitReactions(
-      (reaction, user) =>
-        msg.author.id === user.id &&
-        (reaction.emoji.name === "✅" || reaction.emoji.name === "❌"),
-      {
-        time: 30000,
-        max: 1,
-        errors: ["time"],
-      }
-    );
-  } catch {
-    msg.channel.send(
-      errorEmbed()
-        .setTitle("Transfer cancelled (reaction timeout)")
-        .setDescription(
-          `You're still the leader of \`[${team.tag}] ${team.name}\`.`
-        )
-    );
-    return;
-  }
+  const confirmation = await discordConfirm(
+    msg.author.id,
+    teamTransferMessage,
+    errorEmbed()
+      .setTitle("Transfer cancelled (reaction timeout)")
+      .setDescription(
+        `You're still the leader of \`[${team.tag}] ${team.name}\`.`
+      ),
+    infoEmbed()
+      .setTitle("Transfer cancelled")
+      .setDescription(
+        `You're still the leader of \`[${team.tag}] ${team.name}\`.`
+      )
+  );
 
-  if (reactions.first().emoji.name === "❌") {
-    msg.channel.send(
-      infoEmbed()
-        .setTitle("Transfer cancelled")
-        .setDescription(
-          `You're still the leader of \`[${team.tag}] ${team.name}\`.`
-        )
-    );
+  if (!confirmation) {
     return;
   }
 
