@@ -62,6 +62,7 @@ async function setupTournamentsTable(
     tableBuilder.text("short_name").unique().notNullable();
     tableBuilder.index("short_name");
     tableBuilder.text("gamemode").notNullable();
+    tableBuilder.integer("max_team_size").notNullable();
     tableBuilder.timestamp("opens_at");
     tableBuilder.timestamp("starts_at");
     tableBuilder.text("participant_role_id").notNullable();

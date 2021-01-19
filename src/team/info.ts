@@ -1,66 +1,85 @@
-import { Message, MessageEmbed } from "discord.js";
-import { Args, prefix } from "..";
-import { listTeamMemberships } from "../db/team_memberships";
+import { Message } from "discord.js";
+import { DBTeamMembership, listTeamMemberships } from "../db/team_memberships";
+import { DBTeam, listTeams } from "../db/teams";
+import { errorEmbed, infoEmbed } from "../util/embeds";
+import { TeamArgs } from "./index";
 
-export default async function info(msg: Message, args: Args): Promise<void> {
-  let memberships;
+export default async function info(
+  msg: Message,
+  args: TeamArgs
+): Promise<void> {
+  let team: DBTeam;
+  let memberships: DBTeamMembership[];
+
+  // if a team tag is specified, use that
   if (args.splitCommand[2]) {
-    memberships = await listTeamMemberships({ team_tag: args.splitCommand[2] });
-    console.log(JSON.stringify(memberships, null, 2));
+    const teams = await listTeams({ tag: args.splitCommand[2] });
+    if (!teams.length) {
+      await msg.channel.send(
+        errorEmbed()
+          .setTitle("Invalid team tag")
+          .setDescription(
+            `A team with tag \`${args.splitCommand[2]}\` doesn't exist.`
+          )
+      );
+      return;
+    }
+    memberships = await listTeamMemberships({ team_id: teams[0].id });
   } else {
-    memberships = await listTeamMemberships({ user_id: msg.author.id });
+    // otherwise, use the calling member's team
+    const userMembership = await listTeamMemberships({
+      user_id: msg.author.id,
+    });
+
+    if (!userMembership.length) {
+      await msg.channel.send(
+        errorEmbed()
+          .setTitle("No team found")
+          .setDescription(
+            "In order to use this command without a team tag, you need to be in a team.\nTry `!team info TAG`."
+          )
+      );
+      return;
+    }
+
+    const [teams, teamMemberships] = await Promise.all([
+      listTeams({ id: userMembership[0].team_id }),
+      listTeamMemberships({ team_id: userMembership[0].team_id }),
+    ]);
+
+    team = teams[0];
+    memberships = teamMemberships;
   }
-  if (!args.splitCommand[2] && !memberships.length) {
-    msg.channel.send(noTeamEmbed(prefix));
-    return;
-  } else if (memberships.length && !args[2]) {
-    console.log(memberships);
-    // msg.channel.send(await teamInfoEmbed(teamData));
-    return;
-  } else {
-    console.log(memberships);
+
+  const leader = memberships.find((m) => m.type === "leader");
+  const otherMembers = memberships.filter((m) => m.type !== "leader");
+
+  const memberList: string[] = [];
+
+  // need to exclude the leader, we already have them
+  for (let i = 0; i < args.currentTournament.max_team_size - 1; i++) {
+    if (otherMembers[i]) {
+      memberList.push(`<@${otherMembers[i].user_id}>`);
+    } else {
+      memberList.push(`Open Slot (use \`!team invite @User\`!)`);
+    }
   }
+
+  await msg.channel.send(
+    infoEmbed()
+      .setTitle(`\`[${team.tag}] ${team.name}\``)
+      .setDescription(`**Team Description**: ${team.description}`)
+      .addFields(
+        {
+          name: "Leader:",
+          value: `<@${leader.user_id}>`,
+        },
+        {
+          name: "Members:",
+          value: memberList.map((m, idx) =>
+            idx + 1 === memberList.length ? `- ${m}` : `- ${m}`
+          ),
+        }
+      )
+  );
 }
-
-function noTeamEmbed(prefix: string): MessageEmbed {
-  return new MessageEmbed()
-    .setColor("#ff0000")
-    .setTitle(`No Team Specified`)
-    .setDescription(
-      `This command didn't work because you didn't specify a team. Either use \`${prefix}team info <team tag>\` or join a team to get its info using \`${prefix}team info\`.`
-    )
-
-    .setFooter("Made by iamtheyammer and SweetPlum | d.craft Tournament Bot");
-}
-
-// async function teamInfoEmbed(teamData: DBTeam): Promise<MessageEmbed> {
-//   let member2IGN, member3IGN, member4IGN;
-
-//   return new MessageEmbed()
-//     .setColor("#0099ff")
-//     .setTitle(`\`[${teamData.tag}] ${teamData.name}\``)
-//     .setDescription(`**Description:**\n${teamData.description}`)
-//     .addFields(
-//       {
-//         name: "Leader:",
-//         value: `<@${teamData.leader}> | IGN: ${leaderIGN}`,
-//       },
-//       {
-//         name: "Members:",
-//         value: `${
-//           teamData.members[1]
-//             ? `<@${teamData.members[1]}> | IGN: ${member2IGN}\n${
-//                 teamData.members[2]
-//                   ? `<@${teamData.members[2]}> | IGN: ${member3IGN}\n${
-//                       teamData.members[3]
-//                         ? `<@${teamData.members[3]}> | IGN: ${member4IGN}\n`
-//                         : `\`Open Slot\``
-//                     }`
-//                   : `\`Open Slot\`\n\`Open Slot\``
-//               }`
-//             : `\`Open Slot\`\n\`Open Slot\`\n\`Open Slot\``
-//         }`,
-//       }
-//     )
-//     .setFooter("Made by iamtheyammer and SweetPlum | d.craft Tournament Bot");
-// }

@@ -120,6 +120,7 @@ export default async function createTeam(
         user_id: msg.author.id,
         team_id: teamId,
         tournament_id: currentTournament.id,
+        type: "leader",
       },
       trx
     );

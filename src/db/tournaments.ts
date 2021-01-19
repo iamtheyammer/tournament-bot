@@ -5,6 +5,7 @@ export interface DBTournament {
   name: string;
   short_name: string;
   gamemode: string;
+  max_team_size: number;
   opens_at: Date;
   starts_at: Date;
   participant_role_id: string;
@@ -15,6 +16,7 @@ interface DBTournamentInsertRequest {
   name: string;
   short_name: string;
   gamemode: string;
+  max_team_size: number;
   opens_at?: Date;
   starts_at?: Date;
   participant_role_id?: string;
@@ -32,6 +34,7 @@ interface DBTournamentUpdateRequest {
   name?: string;
   short_name?: string;
   gamemode?: string;
+  max_team_size: number;
   opens_at?: Date;
   starts_at?: Date;
   participant_role_id?: string;
@@ -49,6 +52,7 @@ export async function updateTournament(
     name,
     short_name,
     gamemode,
+    max_team_size,
     opens_at,
     starts_at,
     participant_role_id,
@@ -69,6 +73,10 @@ export async function updateTournament(
 
   if (gamemode) {
     update["gamemode"] = gamemode;
+  }
+
+  if (max_team_size) {
+    update["max_team_size"] = max_team_size;
   }
 
   if (opens_at) {
@@ -97,6 +105,7 @@ interface DBTournamentListRequest {
   name?: string;
   short_name?: string;
   gamemode?: string;
+  max_team_size?: number;
   opens_at?: Date;
   starts_at?: Date;
   participant_role_id?: string;
@@ -111,6 +120,7 @@ export async function listTournaments(
     name,
     short_name,
     gamemode,
+    max_team_size,
     opens_at,
     starts_at,
     participant_role_id,
@@ -135,6 +145,10 @@ export async function listTournaments(
 
   if (gamemode) {
     search["gamemode"] = gamemode;
+  }
+
+  if (max_team_size) {
+    search["max_team_size"] = max_team_size;
   }
 
   if (opens_at) {

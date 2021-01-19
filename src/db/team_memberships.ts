@@ -1,13 +1,15 @@
 import { Transaction } from "knex";
 import db, { DBQueryMeta } from "./index";
 
+type TeamMembershipType = "leader" | "member";
+
 export interface DBTeamMembership {
   id: number;
   user_id: string;
   team_id: number;
   tournament_id: number;
   invite_id?: number;
-  type: string;
+  type: TeamMembershipType;
   inserted_at: string;
 }
 
@@ -16,7 +18,7 @@ interface DBTeamMembershipInsertRequest {
   team_id: number;
   tournament_id: number;
   invite_id?: number;
-  type?: string;
+  type?: TeamMembershipType;
 }
 
 export async function insertTeamMemberships(
@@ -34,7 +36,7 @@ interface DBTeamMembershipDeleteRequest {
   team_id?: number;
   tournament_id?: number;
   invite_id?: number;
-  type?: string;
+  type?: TeamMembershipType;
 }
 
 export async function deleteTeamMemberships(
@@ -49,7 +51,7 @@ interface DBTeamMembershipListRequest {
   team_id?: number;
   tournament_id?: number;
   invite_id?: number;
-  type?: string;
+  type?: TeamMembershipType;
   team_tag?: string;
   meta?: DBQueryMeta;
 }
