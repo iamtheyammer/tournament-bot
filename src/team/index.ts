@@ -13,6 +13,8 @@ import { DBTeamMembership, listTeamMemberships } from "../db/team_memberships";
 import { DBTournament, listTournaments } from "../db/tournaments";
 import { errorEmbed, infoEmbed } from "../util/embeds";
 import leave from "./leave";
+import { transcode } from "buffer";
+import transfer from "./transfer";
 
 export interface TeamArgs extends Args {
   teamMembership?: DBTeamMembership;
@@ -76,6 +78,10 @@ export default async function teamHandler(
     }
     case "info": {
       await info(msg, teamArgs);
+      break;
+    }
+    case "transfer": {
+      await transfer(msg, teamArgs);
       break;
     }
     default: {

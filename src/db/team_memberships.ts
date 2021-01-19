@@ -30,6 +30,31 @@ export async function insertTeamMemberships(
   return rows[0];
 }
 
+interface DBTeamMembershipUpdateRequest {
+  type?: TeamMembershipType;
+  where: {
+    id?: number;
+    team_id?: number;
+    user_id?: string;
+    tournament_id?: number;
+    invite_id?: number;
+    type?: TeamMembershipType;
+  };
+}
+
+export async function updateTeamMembership(
+  req: DBTeamMembershipUpdateRequest,
+  database: Transaction = db
+): Promise<void> {
+  const update = {};
+
+  if (req.type) {
+    update["type"] = req.type;
+  }
+
+  await database("team_memberships").update(update).where(req.where);
+}
+
 interface DBTeamMembershipDeleteRequest {
   id?: number;
   user_id?: string;

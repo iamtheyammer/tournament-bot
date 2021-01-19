@@ -180,10 +180,11 @@ export default async function join(
 
   const textChannel = await getTeamTextChannel(msg, team.category_id);
 
-  await textChannel.send(
+  const joinMessage = await textChannel.send(
     `<@&${team.role_id}>`,
     infoEmbed()
       .setTitle(`${msg.author.tag} joined the team!`)
       .setDescription("Please give them a warm welcome!")
   );
+  await Promise.all([joinMessage.react("👋"), joinMessage.react("🎉")]);
 }

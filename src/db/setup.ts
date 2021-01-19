@@ -110,7 +110,6 @@ async function setupTeamInvitesTable(
   if (teamInvitesTableExists) {
     // we might need to check for certain columns in the future
 
-    console.log("team invites unchanged");
     return "unchanged";
   }
 
