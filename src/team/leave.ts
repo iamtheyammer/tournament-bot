@@ -4,6 +4,7 @@ import { errorEmbed, infoEmbed, successEmbed } from "../util/embeds";
 import { listTeamInvites } from "../db/team_invites";
 import { listTeams } from "../db/teams";
 import { deleteTeamMemberships } from "../db/team_memberships";
+import discordConfirm from "../util/discord_confirm";
 
 export default async function leave(
   msg: Message,
@@ -34,6 +35,32 @@ export default async function leave(
   }
 
   const [team] = await listTeams({ id: args.teamMembership.team_id });
+
+  const leaveConfirmMessage = await msg.reply(
+    infoEmbed().setTitle("Confirm leaving team")
+      .setDescription(`You're about to leave \`[${team.tag}] ${team.name}\`. 
+      You will not be able to rejoin unless you're invited again. 
+      React to confirm.`)
+  );
+
+  const confirmation = await discordConfirm(
+    msg.author.id,
+    leaveConfirmMessage,
+    errorEmbed()
+      .setTitle("Leave timeout")
+      .setDescription(
+        "You're still on your team. Run the command again to leave."
+      ),
+    errorEmbed()
+      .setTitle("Leave cancelled")
+      .setDescription(
+        `You're still a member of \`[${team.tag}] ${team.name}\`.`
+      )
+  );
+
+  if (!confirmation) {
+    return;
+  }
 
   // remove roles
   await msg.member.roles.remove([
