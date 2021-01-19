@@ -9,15 +9,6 @@ export default async function leave(
   msg: Message,
   args: TeamArgs
 ): Promise<void> {
-  if (!args.teamMembership) {
-    await msg.channel.send(
-      errorEmbed()
-        .setTitle("No team")
-        .setDescription("You need to be in a team to leave one!")
-    );
-    return;
-  }
-
   if (args.teamMembership.type === "leader") {
     await msg.channel.send(
       errorEmbed()

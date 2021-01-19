@@ -9,26 +9,6 @@ export default async function invite(
   msg: Message,
   args: TeamArgs
 ): Promise<void> {
-  if (!args.teamMembership) {
-    await msg.channel.send(
-      errorEmbed()
-        .setTitle("No team")
-        .setDescription("You're not in a team! Use `!team create` to make one.")
-    );
-    return;
-  }
-
-  if (args.teamMembership.type !== "leader") {
-    await msg.channel.send(
-      errorEmbed()
-        .setTitle("Insufficient permissions")
-        .setDescription(
-          "Only the team leader can invite others. Ask them to do so."
-        )
-    );
-    return;
-  }
-
   if (msg.mentions.users.some((u) => u.bot)) {
     await msg.channel.send(
       errorEmbed()

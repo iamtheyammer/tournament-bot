@@ -14,17 +14,6 @@ export default async function transfer(
   msg: Message,
   args: TeamArgs
 ): Promise<void> {
-  if (!args.teamMembership) {
-    await msg.channel.send(
-      errorEmbed()
-        .setTitle("No team")
-        .setDescription(
-          "You're not in a team! Use `!team create` or have someone invite you!"
-        )
-    );
-    return;
-  }
-
   if (msg.mentions.members.size !== 1) {
     await msg.channel.send(
       errorEmbed()
@@ -41,15 +30,6 @@ export default async function transfer(
       errorEmbed()
         .setTitle("Invalid recipient")
         .setDescription("You can't transfer a team to yourself!")
-    );
-    return;
-  }
-
-  if (args.teamMembership.type !== "leader") {
-    await msg.channel.send(
-      errorEmbed()
-        .setTitle("Insufficient permissions")
-        .setDescription("Only leaders can transfer their team.")
     );
     return;
   }

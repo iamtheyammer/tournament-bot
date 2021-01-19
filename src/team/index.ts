@@ -65,6 +65,7 @@ export default async function teamHandler(
       break;
     }
     case "invite": {
+      if (!(await requireLeaderMembership(msg, teamArgs))) return;
       await invite(msg, teamArgs);
       break;
     }
@@ -73,6 +74,7 @@ export default async function teamHandler(
       break;
     }
     case "leave": {
+      if (!(await requireTeamMembership(msg, teamArgs))) return;
       await leave(msg, teamArgs);
       break;
     }
@@ -81,6 +83,7 @@ export default async function teamHandler(
       break;
     }
     case "transfer": {
+      if (!(await requireLeaderMembership(msg, teamArgs))) return;
       await transfer(msg, teamArgs);
       break;
     }
@@ -103,6 +106,42 @@ export function noIGNLinked(prefix: string): MessageEmbed {
       `You cannot use any team commands because you haven't linked your discord account to Hypixel. Use \`${prefix}ign link <name>\` to link your account.`
     )
     .setFooter("Made by iamtheyammer and SweetPlum | d.craft Tournament Bot");
+}
+
+export async function requireTeamMembership(
+  msg: Message,
+  args: TeamArgs
+): Promise<boolean> {
+  if (!args.teamMembership) {
+    await msg.reply(
+      errorEmbed()
+        .setTitle("No team")
+        .setDescription(
+          "This command requires you to be in a team. " +
+            "Create one with `!team create` or ask another team's leader to invite you."
+        )
+    );
+    return false;
+  }
+  return true;
+}
+
+export async function requireLeaderMembership(
+  msg: Message,
+  args: TeamArgs
+): Promise<boolean> {
+  if (!(await requireTeamMembership(msg, args))) return false;
+
+  if (args.teamMembership.type !== "leader") {
+    await msg.reply(
+      errorEmbed()
+        .setTitle("Insufficient permissions")
+        .setDescription("You must be the team leader to execute that command.")
+    );
+    return false;
+  }
+
+  return true;
 }
 
 export async function getTeamTextChannel(
