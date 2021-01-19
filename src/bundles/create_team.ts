@@ -96,6 +96,16 @@ export default async function createTeam(
     throw e;
   }
 
+  try {
+    await msg.member.roles.add(currentTournament.participant_role_id);
+    rollbackStack.push(
+      msg.member.roles.remove(currentTournament.participant_role_id)
+    );
+  } catch (e) {
+    await rollback("add participant role to leader");
+    throw e;
+  }
+
   let teamId: number;
   try {
     teamId = await insertTeam(
