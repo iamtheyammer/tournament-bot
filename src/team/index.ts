@@ -57,7 +57,7 @@ export default async function teamHandler(
       break;
     }
     case "invite": {
-      await invite(msg);
+      await invite(msg, teamArgs);
       break;
     }
     case "join": {

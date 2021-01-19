@@ -38,7 +38,11 @@ export async function listUsers(req: DBUserListRequest): Promise<DBUser[]> {
   const query = db("users");
 
   if (req.discord_id) {
-    query.where({ discord_id: req.discord_id });
+    if (typeof req.discord_id === "string") {
+      query.where({ discord_id: req.discord_id });
+    } else {
+      query.whereIn("discord_id", req.discord_id);
+    }
   }
 
   if (req.minecraft_uuid) {

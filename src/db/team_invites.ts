@@ -19,7 +19,7 @@ interface DBTeamInviteInsertRequest {
 }
 
 export async function insertTeamInvite(
-  req: DBTeamInviteInsertRequest
+  req: DBTeamInviteInsertRequest | DBTeamInviteInsertRequest[]
 ): Promise<number> {
   const rows = await db("team_invites").insert(req).returning("id");
 
@@ -82,7 +82,7 @@ interface DBTeamInviteListRequestMeta extends DBQueryMeta {
 interface DBTeamInviteListRequest {
   id?: number;
   team_id?: number;
-  invited_user_id?: string;
+  invited_user_id?: string | string[];
   inviter_user_id?: string;
   retracted?: string;
 
@@ -111,7 +111,10 @@ export async function listTeamInvites(
   }
 
   if (invited_user_id) {
-    query.where({ invited_user_id });
+    query.whereIn(
+      "invited_user_id",
+      typeof invited_user_id === "string" ? [invited_user_id] : invited_user_id
+    );
   }
 
   if (inviter_user_id) {

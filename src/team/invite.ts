@@ -1,89 +1,143 @@
 import { Message, MessageEmbed } from "discord.js";
 import { listTeams } from "../db/teams";
-import { listTeamInvites } from "../db/team_invites";
-import { listTeamMemberships } from "../db/team_memberships";
-import { prefix } from "../index";
+import { insertTeamInvite, listTeamInvites } from "../db/team_invites";
+import { TeamArgs } from "./index";
+import { errorEmbed, infoEmbed } from "../util/embeds";
+import { listUsers } from "../db/users";
 
-export default async function invite(msg: Message): Promise<void> {
-  const teamMembers = await listTeamMemberships({
-    user_id: msg.author.id,
-    meta: { order_by: { exp: "team_memberships.inserted_at", dir: "DESC" } },
-  });
-  const team = await listTeams({
-    id: teamMembers[0].team_id,
-  });
-  if (!teamMembers.length) {
-    msg.channel.send(notInTeamEmbed(msg.mentions.members.first().id));
-    return;
-  }
-  if (teamMembers[0].type !== "leader") {
-    msg.channel.send(
-      notLeaderEmbed(team[0].tag, team[0].name, msg.mentions.members.first().id)
+export default async function invite(
+  msg: Message,
+  args: TeamArgs
+): Promise<void> {
+  if (!args.teamMembership) {
+    await msg.channel.send(
+      errorEmbed()
+        .setTitle("No team")
+        .setDescription("You're not in a team! Use `!team create` to make one.")
     );
     return;
   }
-  const invitee = await listTeamMemberships({
-    user_id: msg.mentions.members.first().id,
-    meta: { order_by: { exp: "team_memberships.inserted_at", dir: "DESC" } },
-  });
-  if (invitee.length) {
-    msg.channel.send(
-      alreadyInDiffTeamEmbed(
-        team[0].tag,
-        team[0].name,
-        msg.mentions.members.first().id
-      )
+
+  if (args.teamMembership.type !== "leader") {
+    await msg.channel.send(
+      errorEmbed()
+        .setTitle("Insufficient permissions")
+        .setDescription(
+          "Only the team leader can invite others. Ask them to do so."
+        )
     );
     return;
   }
-  const inviteList = await listTeamInvites({
-    invited_user_id: msg.mentions.members.first().id,
-  });
-  if (inviteList.length) {
-    msg.channel.send(
-      alreadyInvitedEmbed(
-        team[0].tag,
-        team[0].name,
-        msg.mentions.members.first().id
-      )
+
+  if (msg.mentions.users.some((u) => u.bot)) {
+    await msg.channel.send(
+      errorEmbed()
+        .setTitle("Invalid user")
+        .setDescription("You can't invite bots to your team, silly!")
     );
     return;
   }
+
+  const inviteesIds = msg.mentions.users.map((u) => u.id);
+  console.log(inviteesIds);
+
+  const [invitees, [team]] = await Promise.all([
+    listUsers({
+      discord_id: inviteesIds,
+      meta: { require_uuid: true },
+    }),
+    listTeams({ id: args.teamMembership.team_id }),
+  ]);
+
+  console.log(invitees, team);
+  console.log(msg.mentions.users);
+
   if (
-    invitee[0].team_id === team[0].id &&
-    invitee[0].tournament_id === team[0].tournament_id
+    invitees.length !== msg.mentions.users.size ||
+    invitees.some((u) => !u.minecraft_uuid)
   ) {
-    msg.channel.send(
-      alreadyInTeamEmbed(
-        team[0].tag,
-        team[0].name,
-        msg.mentions.members.first().id
-      )
+    await msg.channel.send(
+      errorEmbed()
+        .setTitle("Invalid user(s)")
+        .setDescription(
+          "One or more of the users you invited doesn't have their Minecraft username " +
+            "linked to their account or isn't a member of this server. " +
+            "Contact admins if you're sure everyone has done so."
+        )
     );
     return;
   }
-  msg.guild.members.cache
-    .get(msg.mentions.members.first().id)
-    .send(invitedToJoinEmbed(team[0].tag, team[0].name, prefix))
-    .then(() => {
-      msg.channel.send(
-        inviteSuccess(
-          team[0].tag,
-          team[0].name,
-          msg.mentions.members.first().id
+
+  const existingInvites = await listTeamInvites({
+    invited_user_id: inviteesIds,
+    team_id: team.id,
+  });
+  if (existingInvites.length) {
+    await msg.channel.send(
+      errorEmbed()
+        .setTitle("Already invited")
+        .setDescription(
+          `One or more of the users you're trying to invite have already been invited: ${existingInvites
+            .map(
+              (i) =>
+                `<@${i.invited_user_id}> (invited by <@${i.inviter_user_id}>)`
+            )
+            .join(", ")}`
         )
-      );
-    })
-    .catch(() => {
-      msg.channel.send(
-        cannotInviteBotEmbed(
-          team[0].tag,
-          team[0].name,
-          msg.mentions.members.first().id
+    );
+    return;
+  }
+
+  // invited via db
+
+  try {
+    await insertTeamInvite(
+      invitees.map((i) => ({
+        team_id: team.id,
+        invited_user_id: i.discord_id,
+        inviter_user_id: msg.author.id,
+      }))
+    );
+  } catch {
+    await msg.channel.send(
+      errorEmbed()
+        .setTitle("Error inserting invites")
+        .setDescription(
+          "There was a server error adding the invites. Try again later or contact admins."
         )
-      );
-      return;
-    });
+    );
+    return;
+  }
+
+  msg.mentions.users.forEach(
+    async (u): Promise<void> => {
+      const embed = infoEmbed()
+        .setTitle(`Invited to \`[${team.tag}] ${team.name}\``)
+        .setDescription(
+          `You've been invited to \`[${team.tag}] ${team.name}\` by <@${msg.author.id}>! Head over to the tournaments server and use \`!team join ${team.tag}\`!\n
+        If you're already in a team, you'll need to use \`!team leave\` first. You can see other teams you've been invited to with \`!invites\`.`
+        );
+      const noDmMsg = `<@${u.id}> was invited, but we couldn't DM them. Tell them you've invited them!\n(<@${u.id}>, use \`!invites\` to see all your invites!)`;
+      const successMsg = `${u.username} was successfully invited! They recieved a DM from this bot.`;
+
+      if (!u.dmChannel) {
+        const ch = await u.createDM();
+        try {
+          await ch.send(embed);
+          await msg.reply(successMsg);
+        } catch {
+          await msg.reply(noDmMsg);
+        }
+      } else {
+        try {
+          await u.dmChannel.send(embed);
+          await msg.reply(successMsg);
+        } catch {
+          await msg.reply(noDmMsg);
+        }
+      }
+    }
+  );
 }
 
 function invitedToJoinEmbed(
