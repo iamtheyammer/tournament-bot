@@ -89,7 +89,7 @@ export async function updateTeam(
     update["tag"] = req.tag;
   }
 
-  if (req.name) {
+  if (req.name !== undefined) {
     update["name"] = req.name;
   }
 
@@ -101,7 +101,7 @@ export async function updateTeam(
     update["category_id"] = req.category_id;
   }
 
-  if (req.description) {
+  if (req.description !== undefined) {
     update["description"] = req.description;
   }
 

@@ -24,6 +24,16 @@ export default async function create(
 
   const teamTag = args.splitCommand[2].toUpperCase();
   const teamName = args.splitCommand[3];
+
+  if (teamName.length > 30) {
+    await msg.reply(
+      errorEmbed()
+        .setTitle("Team name too long")
+        .setDescription("Team names can be a maximum of **30 characters**.")
+    );
+    return;
+  }
+
   const teamList = await listTeams({ tag: teamTag });
   if (teamList.length) {
     msg.channel.send(
