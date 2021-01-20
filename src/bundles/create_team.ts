@@ -89,20 +89,15 @@ export default async function createTeam(
   }
 
   try {
-    await msg.member.roles.add(teamRole);
-    // no rollback needed because role is removed from user when role is deleted
-  } catch (e) {
-    await rollback("add role to leader");
-    throw e;
-  }
-
-  try {
-    await msg.member.roles.add(currentTournament.participant_role_id);
-    rollbackStack.push(
+    await msg.member.roles.add([
+      teamRole,
+      currentTournament.participant_role_id,
+    ]);
+    rollbackStack.push(() =>
       msg.member.roles.remove(currentTournament.participant_role_id)
     );
   } catch (e) {
-    await rollback("add participant role to leader");
+    await rollback("add role to leader");
     throw e;
   }
 

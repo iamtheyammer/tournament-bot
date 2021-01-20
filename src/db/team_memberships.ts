@@ -65,9 +65,10 @@ interface DBTeamMembershipDeleteRequest {
 }
 
 export async function deleteTeamMemberships(
-  req: DBTeamMembershipDeleteRequest
+  req: DBTeamMembershipDeleteRequest,
+  database: Transaction = db
 ): Promise<void> {
-  await db("team_memberships").where(req).del();
+  await database("team_memberships").where(req).del();
 }
 
 interface DBTeamMembershipListRequest {

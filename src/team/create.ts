@@ -24,12 +24,24 @@ export default async function create(
 
   const teamTag = args.splitCommand[2].toUpperCase();
   const teamName = args.splitCommand[3];
+  const teamDescription = args.splitCommand[4];
 
   if (teamName.length > 30) {
     await msg.reply(
       errorEmbed()
         .setTitle("Team name too long")
         .setDescription("Team names can be a maximum of **30 characters**.")
+    );
+    return;
+  }
+
+  if (teamDescription && teamDescription.length > 255) {
+    await msg.reply(
+      errorEmbed()
+        .setTitle("Team description too long")
+        .setDescription(
+          "Team descriptions can be a maximum of **255 characters**."
+        )
     );
     return;
   }
@@ -54,7 +66,11 @@ export default async function create(
   }
 
   const teamCreationMessage = await msg.channel.send(
-    teamCreationConfirmEmbed(teamTag, teamName)
+    teamCreationConfirmEmbed(
+      teamTag,
+      teamName,
+      teamDescription || "(no description provided)"
+    )
   );
 
   const confirmation = await discordConfirm(
@@ -80,7 +96,8 @@ export default async function create(
       args.currentTournament,
       msg.author.id,
       teamName,
-      teamTag
+      teamTag,
+      teamDescription
     );
   } catch (e) {
     await msg.channel.send(
@@ -101,17 +118,24 @@ export default async function create(
   );
 }
 
-function teamCreationConfirmEmbed(tag: string, name: string): MessageEmbed {
+function teamCreationConfirmEmbed(
+  tag: string,
+  name: string,
+  description: string
+): MessageEmbed {
   return new MessageEmbed()
     .setColor("#0099ff")
     .setTitle("Confirm Team Creation")
     .setDescription(
       `Are you sure these are the settings you want? React with the adequate emoji to confirm creation. This request will timeout in 30 seconds.`
     )
-    .addFields({
-      name: "Full Team Name (With Tag)",
-      value: `\`[${tag}] ${name}\``,
-    })
+    .addFields(
+      {
+        name: "Full Team Name (With Tag)",
+        value: `\`[${tag}] ${name}\``,
+      },
+      { name: "Description", value: description }
+    )
     .setFooter("Made by iamtheyammer and SweetPlum | d.craft Tournament Bot");
 }
 

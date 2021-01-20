@@ -17,6 +17,7 @@ import { transcode } from "buffer";
 import transfer from "./transfer";
 import kick from "./kick";
 import edit from "./edit/index";
+import deleteTeam from "./delete";
 
 export interface TeamArgs extends Args {
   teamMembership?: DBTeamMembership;
@@ -97,6 +98,11 @@ export default async function teamHandler(
     case "edit": {
       if (!(await requireLeaderMembership(msg, teamArgs))) return;
       await edit(msg, teamArgs);
+      break;
+    }
+    case "delete": {
+      if (!(await requireLeaderMembership(msg, teamArgs))) return;
+      await deleteTeam(msg, teamArgs);
       break;
     }
     default: {
