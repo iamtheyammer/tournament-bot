@@ -8,6 +8,7 @@ import teamHandler from "./team";
 import { setupDatabase } from "./db/setup";
 import { DBUser, listUsers } from "./db/users";
 import { errorEmbed } from "./util/embeds";
+import tournamentHandler from "./tournament";
 const client = new Discord.Client();
 const token = process.env.DISCORD_TOKEN;
 
@@ -25,6 +26,7 @@ export type Args = {
   splitCommand: string[];
   splitCommandLower: string[];
   user?: DBUser;
+  memberIsAdmin: boolean;
 };
 
 /*
@@ -48,7 +50,12 @@ client.on("message", async (msg) => {
     splitCommand,
     splitCommandLower,
     user: users.length && users[0],
+    memberIsAdmin: false,
   };
+
+  if (msg.member.roles.cache.some((r) => r.name === "Tournament Bot Admin")) {
+    args.memberIsAdmin = true;
+  }
 
   try {
     switch (args.splitCommandLower[0]) {
@@ -58,6 +65,10 @@ client.on("message", async (msg) => {
       }
       case "team": {
         await teamHandler(msg, args);
+        break;
+      }
+      case "tournament": {
+        await tournamentHandler(msg, args);
         break;
       }
     }
