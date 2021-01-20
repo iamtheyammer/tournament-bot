@@ -7,7 +7,6 @@ import {
 } from "../db/team_memberships";
 import { errorEmbed, successEmbed, warnEmbed } from "../util/embeds";
 import discordConfirm from "../util/discord_confirm";
-import { errorMonitor } from "events";
 import db from "../db";
 import { deleteTeamInvite } from "../db/team_invites";
 

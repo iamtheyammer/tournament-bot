@@ -1,7 +1,6 @@
 import { Message } from "discord.js";
 import { getTeamTextChannel, TeamArgs } from "./index";
 import { errorEmbed, infoEmbed, successEmbed } from "../util/embeds";
-import { listTeamInvites } from "../db/team_invites";
 import { listTeams } from "../db/teams";
 import { deleteTeamMemberships } from "../db/team_memberships";
 import discordConfirm from "../util/discord_confirm";

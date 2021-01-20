@@ -1,15 +1,6 @@
-import {
-  CategoryChannel,
-  Message,
-  MessageEmbed,
-  TextChannel,
-} from "discord.js";
+import { Message } from "discord.js";
 import { listTeams } from "../db/teams";
-import {
-  deleteTeamInvite,
-  listTeamInvites,
-  updateTeamInvite,
-} from "../db/team_invites";
+import { listTeamInvites, updateTeamInvite } from "../db/team_invites";
 import {
   insertTeamMemberships,
   listTeamMemberships,

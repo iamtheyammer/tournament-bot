@@ -6,8 +6,7 @@ import {
   listTeamMemberships,
   updateTeamMembership,
 } from "../db/team_memberships";
-import { listTeams, updateTeam } from "../db/teams";
-import info from "./info";
+import { listTeams } from "../db/teams";
 import discordConfirm from "../util/discord_confirm";
 
 export default async function transfer(
