@@ -10,7 +10,7 @@ export default async function name(
 ): Promise<void> {
   const name = args.splitCommand[3];
   if (name.length > 30) {
-    await msg.reply(
+    await msg.channel.send(
       errorEmbed()
         .setTitle("Name too long")
         .setDescription(`Team names can be a max of 30 characters.`)
@@ -20,7 +20,7 @@ export default async function name(
 
   const [team] = await listTeams({ id: args.teamMembership.team_id });
 
-  const confirmMessage = await msg.reply(
+  const confirmMessage = await msg.channel.send(
     infoEmbed()
       .setTitle("Confirm new name")
       .addFields(
@@ -46,7 +46,7 @@ export default async function name(
 
   await updateTeam({ name, where: { id: team.id } });
 
-  await msg.reply(
+  await msg.channel.send(
     successEmbed()
       .setTitle("Successfully updated name")
       .setDescription("Your shiny new name is below.")

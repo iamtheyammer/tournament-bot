@@ -10,7 +10,7 @@ export default async function currentInfo(
   const tourney = args.currentTournament;
 
   if (!tourney) {
-    await msg.reply(
+    await msg.channel.send(
       infoEmbed()
         .setTitle("No current tournament")
         .setDescription(
@@ -20,7 +20,7 @@ export default async function currentInfo(
     return;
   }
 
-  await msg.reply(
+  await msg.channel.send(
     infoEmbed()
       .setTitle(`Current Tournament: ${tourney.name}`)
       .addFields(

@@ -10,7 +10,7 @@ export default async function description(
 ): Promise<void> {
   let description = args.splitCommand[3];
   if (description.length > 255) {
-    await msg.reply(
+    await msg.channel.send(
       errorEmbed()
         .setTitle("Description too long")
         .setDescription(`Descriptions can be a max of 255 characters.`)
@@ -24,7 +24,7 @@ export default async function description(
 
   const [team] = await listTeams({ id: args.teamMembership.team_id });
 
-  const confirmMessage = await msg.reply(
+  const confirmMessage = await msg.channel.send(
     infoEmbed()
       .setTitle("Confirm new description")
       .addFields(
@@ -50,7 +50,7 @@ export default async function description(
 
   await updateTeam({ description, where: { id: team.id } });
 
-  await msg.reply(
+  await msg.channel.send(
     successEmbed()
       .setTitle("Successfully updated description")
       .setDescription("Your shiny new description is below.")

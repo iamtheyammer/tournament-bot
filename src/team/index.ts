@@ -140,7 +140,7 @@ export async function requireTeamMembership(
   args: TeamArgs
 ): Promise<boolean> {
   if (!args.teamMembership) {
-    await msg.reply(
+    await msg.channel.send(
       errorEmbed()
         .setTitle("No team")
         .setDescription(
@@ -160,7 +160,7 @@ export async function requireLeaderMembership(
   if (!(await requireTeamMembership(msg, args))) return false;
 
   if (args.teamMembership.type !== "leader") {
-    await msg.reply(
+    await msg.channel.send(
       errorEmbed()
         .setTitle("Insufficient permissions")
         .setDescription("You must be the team leader to execute that command.")

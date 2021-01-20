@@ -9,7 +9,7 @@ export default async function edit(
   args: TeamArgs
 ): Promise<void> {
   if (args.splitCommandLower.length < 4) {
-    await msg.reply(commandUsage);
+    await msg.channel.send(commandUsage);
     return;
   }
 
@@ -25,7 +25,7 @@ export default async function edit(
       break;
     }
     default: {
-      await msg.reply(commandUsage);
+      await msg.channel.send(commandUsage);
     }
   }
 }

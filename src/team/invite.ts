@@ -101,16 +101,16 @@ export default async function invite(
         const ch = await u.createDM();
         try {
           await ch.send(embed);
-          await msg.reply(successMsg);
+          await msg.channel.send(successMsg);
         } catch {
-          await msg.reply(noDmMsg);
+          await msg.channel.send(noDmMsg);
         }
       } else {
         try {
           await u.dmChannel.send(embed);
-          await msg.reply(successMsg);
+          await msg.channel.send(successMsg);
         } catch {
-          await msg.reply(noDmMsg);
+          await msg.channel.send(noDmMsg);
         }
       }
     }

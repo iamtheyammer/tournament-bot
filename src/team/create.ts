@@ -27,7 +27,7 @@ export default async function create(
   const teamDescription = args.splitCommand[4];
 
   if (teamName.length > 30) {
-    await msg.reply(
+    await msg.channel.send(
       errorEmbed()
         .setTitle("Team name too long")
         .setDescription("Team names can be a maximum of **30 characters**.")
@@ -36,7 +36,7 @@ export default async function create(
   }
 
   if (teamDescription && teamDescription.length > 255) {
-    await msg.reply(
+    await msg.channel.send(
       errorEmbed()
         .setTitle("Team description too long")
         .setDescription(

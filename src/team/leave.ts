@@ -35,7 +35,7 @@ export default async function leave(
 
   const [team] = await listTeams({ id: args.teamMembership.team_id });
 
-  const leaveConfirmMessage = await msg.reply(
+  const leaveConfirmMessage = await msg.channel.send(
     infoEmbed().setTitle("Confirm leaving team")
       .setDescription(`You're about to leave \`[${team.tag}] ${team.name}\`. 
       You will not be able to rejoin unless you're invited again. 
