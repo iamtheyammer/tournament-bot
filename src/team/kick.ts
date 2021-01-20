@@ -114,7 +114,7 @@ export default async function kick(
   }
 
   try {
-    await toKick.dmChannel.send(
+    await toKick.send(
       infoEmbed()
         .setTitle(`Kicked from \`\`[${team.tag}] ${team.name}\`\``)
         .setDescription(

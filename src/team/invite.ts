@@ -104,22 +104,11 @@ export default async function invite(
         .setDescription(
           `<@${u.id}> was successfully invited! They received a DM from this bot.`
         );
-
-      if (!u.dmChannel) {
-        const ch = await u.createDM();
-        try {
-          await ch.send(embed);
-          await msg.channel.send(successMsg);
-        } catch {
-          await msg.channel.send(noDmMsg);
-        }
-      } else {
-        try {
-          await u.dmChannel.send(embed);
-          await msg.channel.send(successMsg);
-        } catch {
-          await msg.channel.send(noDmMsg);
-        }
+      try {
+        await u.send(embed);
+        await msg.channel.send(successMsg);
+      } catch {
+        await msg.channel.send(noDmMsg);
       }
     }
   );
