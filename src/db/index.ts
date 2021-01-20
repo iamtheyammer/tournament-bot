@@ -34,11 +34,12 @@ export function handleMeta(query: QueryBuilder, meta: DBQueryMeta): void {
 }
 
 const databaseConnString = process.env.DATABASE_DSN || process.env.DATABASE_URL;
+const local = process.env.NODE_ENV !== "production";
 
 const db = knex({
   client: "pg",
   connection: databaseConnString,
-  ssl: !databaseConnString.includes("localhost"),
+  ssl: !local,
 });
 
 export default db;
