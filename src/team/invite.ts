@@ -102,7 +102,7 @@ export default async function invite(
       const successMsg = infoEmbed()
         .setTitle("Invite Successful")
         .setDescription(
-          `${u.username} was successfully invited! They received a DM from this bot.`
+          `<@${u.id}> was successfully invited! They received a DM from this bot.`
         );
 
       if (!u.dmChannel) {
