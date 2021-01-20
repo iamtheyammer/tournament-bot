@@ -1,11 +1,13 @@
-import { Args } from "../index";
 import { Message } from "discord.js";
 import { listUsers } from "../db/users";
 import { errorEmbed, infoEmbed } from "../util/embeds";
 import { fetchMojangUserProfile } from "../apis";
 import { normalizeUuid } from "../util/uuid";
 
-export default async function list(msg: Message, args: Args): Promise<void> {
+export default async function list(
+  msg: Message,
+  args: Array<string>
+): Promise<void> {
   const pageNum = args[2] ? parseInt(args[2]) : 0;
 
   if (isNaN(pageNum)) {

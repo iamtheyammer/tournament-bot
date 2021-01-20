@@ -1,10 +1,13 @@
+import { Transaction } from "knex";
 import db, { DBQueryMeta, handleMeta } from "./index";
 
-interface DBTeam {
+export interface DBTeam {
   id: number;
   tournament_id: number;
   name: string;
   tag: string;
+  role_id: string;
+  category_id: string;
   description?: string;
   public: boolean;
   inserted_at: Date;
@@ -14,18 +17,33 @@ interface DBTeamInsertRequest {
   tournament_id: number;
   name: string;
   tag: string;
+  role_id?: string;
+  category_id?: string;
   description?: string;
   public?: boolean;
 }
 
 // returns the newly created team ID
-export async function insertTeam(req: DBTeamInsertRequest): Promise<number> {
-  const { tournament_id, name, tag, description, public: isPublic } = req;
+export async function insertTeam(
+  req: DBTeamInsertRequest,
+  database: Transaction = db
+): Promise<number> {
+  const {
+    tournament_id,
+    name,
+    tag,
+    role_id,
+    category_id,
+    description,
+    public: isPublic,
+  } = req;
 
   const row = {
     tournament_id,
     name,
     tag,
+    role_id,
+    category_id,
   };
 
   if (description) {
@@ -36,7 +54,7 @@ export async function insertTeam(req: DBTeamInsertRequest): Promise<number> {
     row["public"] = isPublic;
   }
 
-  const rows = await db("teams").insert(row).returning("id");
+  const rows = await database("teams").insert(row).returning("id");
 
   return rows[0];
 }
@@ -45,6 +63,8 @@ interface DBTeamUpdateRequest {
   tournament_id?: number;
   tag?: string;
   name?: string;
+  role_id?: string;
+  category_id?: string;
   description?: string;
   public?: boolean;
   where: {
@@ -53,8 +73,11 @@ interface DBTeamUpdateRequest {
   };
 }
 
-export async function updateTeam(req: DBTeamUpdateRequest): Promise<void> {
-  const query = db("teams").where(req.where);
+export async function updateTeam(
+  req: DBTeamUpdateRequest,
+  database: Transaction = db
+): Promise<void> {
+  const query = database("teams").where(req.where);
 
   const update = {};
 
@@ -66,11 +89,19 @@ export async function updateTeam(req: DBTeamUpdateRequest): Promise<void> {
     update["tag"] = req.tag;
   }
 
-  if (req.name) {
+  if (req.name !== undefined) {
     update["name"] = req.name;
   }
 
-  if (req.description) {
+  if (req.role_id) {
+    update["role_id"] = req.role_id;
+  }
+
+  if (req.category_id) {
+    update["category_id"] = req.category_id;
+  }
+
+  if (req.description !== undefined) {
     update["description"] = req.description;
   }
 
@@ -86,26 +117,37 @@ export async function updateTeam(req: DBTeamUpdateRequest): Promise<void> {
 interface DBTeamDeleteRequest {
   id?: number;
   tournament_id?: number;
-  tag?: number;
+  tag?: string;
   name?: string;
+  role_id?: string;
+  category_id?: string;
   public?: boolean;
 }
 
-export async function deleteTeams(req: DBTeamDeleteRequest): Promise<void> {
-  await db("teams").where(req).del();
+export async function deleteTeams(
+  req: DBTeamDeleteRequest,
+  database: Transaction = db
+): Promise<void> {
+  await database("teams").where(req).del();
 }
 
 interface DBListTeamsRequest {
   id?: number;
   tournament_id?: number;
-  tag?: number;
+  tag?: string;
   name?: string;
+  role_id?: string;
+  category_id?: string;
   public?: boolean;
+  user_id?: string;
   meta?: DBQueryMeta;
 }
 
-export async function listTeams(req: DBListTeamsRequest): Promise<DBTeam[]> {
-  const query = db("teams");
+export async function listTeams(
+  req: DBListTeamsRequest,
+  database: Transaction = db
+): Promise<DBTeam[]> {
+  const query = database("teams");
 
   if (req.id) {
     query.where({ id: req.id });
@@ -123,8 +165,22 @@ export async function listTeams(req: DBListTeamsRequest): Promise<DBTeam[]> {
     query.where({ name: req.name });
   }
 
+  if (req.role_id) {
+    query.where({ name: req.role_id });
+  }
+
+  if (req.category_id) {
+    query.where({ name: req.category_id });
+  }
+
   if (req.public) {
     query.where({ public: req.public });
+  }
+
+  if (req.user_id) {
+    query
+      .join("team_memberships", "teams.id", "team_memberships.team_id")
+      .where({ "team_memberships.user_id": req.user_id });
   }
 
   handleMeta(query, req.meta);

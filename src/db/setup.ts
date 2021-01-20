@@ -62,8 +62,10 @@ async function setupTournamentsTable(
     tableBuilder.text("short_name").unique().notNullable();
     tableBuilder.index("short_name");
     tableBuilder.text("gamemode").notNullable();
+    tableBuilder.integer("max_team_size").notNullable();
     tableBuilder.timestamp("opens_at");
     tableBuilder.timestamp("starts_at");
+    tableBuilder.text("participant_role_id").notNullable();
     tableBuilder.timestamp("inserted_at").defaultTo(trx.fn.now()).notNullable();
   });
 
@@ -90,6 +92,8 @@ async function setupTeamsTable(
     tableBuilder.text("name").notNullable();
     tableBuilder.text("tag").unique().notNullable();
     tableBuilder.unique(["tournament_id", "tag"]);
+    tableBuilder.text("role_id").unique();
+    tableBuilder.text("category_id").unique();
     tableBuilder.text("description");
     tableBuilder.boolean("public").notNullable().defaultTo(false);
     tableBuilder.timestamp("inserted_at").defaultTo(trx.fn.now()).notNullable();
@@ -106,7 +110,6 @@ async function setupTeamInvitesTable(
   if (teamInvitesTableExists) {
     // we might need to check for certain columns in the future
 
-    console.log("team invites unchanged");
     return "unchanged";
   }
 

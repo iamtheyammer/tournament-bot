@@ -1,5 +1,5 @@
 import { Message } from "discord.js";
-import { prefix } from "../index";
+import { Args, prefix } from "../index";
 import link from "./link";
 import list from "./list";
 import get from "./get";
@@ -8,19 +8,19 @@ import { infoEmbed } from "../util/embeds";
 
 export default async function ignHandler(
   msg: Message,
-  args: Array<string>
+  args: Args
 ): Promise<void> {
-  switch (args[1]) {
+  switch (args.splitCommandLower[1]) {
     case "link": {
-      await link(msg, args);
+      await link(msg, args.splitCommandLower);
       break;
     }
     case "list": {
-      await list(msg, args);
+      await list(msg, args.splitCommandLower);
       break;
     }
     case "get": {
-      await get(msg, args);
+      await get(msg, args.splitCommandLower);
       break;
     }
     case "unlink": {

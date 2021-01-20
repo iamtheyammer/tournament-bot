@@ -1,12 +1,15 @@
+import { Transaction } from "knex";
 import db, { DBQueryMeta } from "./index";
 
-interface DBTeamMembership {
+type TeamMembershipType = "leader" | "member";
+
+export interface DBTeamMembership {
   id: number;
   user_id: string;
   team_id: number;
   tournament_id: number;
   invite_id?: number;
-  type: string;
+  type: TeamMembershipType;
   inserted_at: string;
 }
 
@@ -15,15 +18,41 @@ interface DBTeamMembershipInsertRequest {
   team_id: number;
   tournament_id: number;
   invite_id?: number;
-  type?: string;
+  type?: TeamMembershipType;
 }
 
 export async function insertTeamMemberships(
-  req: DBTeamMembershipInsertRequest | DBTeamMembershipInsertRequest[]
+  req: DBTeamMembershipInsertRequest | DBTeamMembershipInsertRequest[],
+  database: Transaction = db
 ): Promise<number> {
-  const rows = await db("team_memberships").insert(req).returning("id");
+  const rows = await database("team_memberships").insert(req).returning("id");
 
   return rows[0];
+}
+
+interface DBTeamMembershipUpdateRequest {
+  type?: TeamMembershipType;
+  where: {
+    id?: number;
+    team_id?: number;
+    user_id?: string;
+    tournament_id?: number;
+    invite_id?: number;
+    type?: TeamMembershipType;
+  };
+}
+
+export async function updateTeamMembership(
+  req: DBTeamMembershipUpdateRequest,
+  database: Transaction = db
+): Promise<void> {
+  const update = {};
+
+  if (req.type) {
+    update["type"] = req.type;
+  }
+
+  await database("team_memberships").update(update).where(req.where);
 }
 
 interface DBTeamMembershipDeleteRequest {
@@ -32,29 +61,40 @@ interface DBTeamMembershipDeleteRequest {
   team_id?: number;
   tournament_id?: number;
   invite_id?: number;
-  type?: string;
+  type?: TeamMembershipType;
 }
 
 export async function deleteTeamMemberships(
-  req: DBTeamMembershipDeleteRequest
+  req: DBTeamMembershipDeleteRequest,
+  database: Transaction = db
 ): Promise<void> {
-  await db("team_memberships").where(req).del();
+  await database("team_memberships").where(req).del();
 }
 
 interface DBTeamMembershipListRequest {
   id?: number;
-  user_id?: string;
+  user_id?: string | string[];
   team_id?: number;
   tournament_id?: number;
   invite_id?: number;
-  type?: string;
+  type?: TeamMembershipType;
+  team_tag?: string;
   meta?: DBQueryMeta;
 }
 
 export async function listTeamMemberships(
   req: DBTeamMembershipListRequest
 ): Promise<DBTeamMembership[]> {
-  const { id, user_id, team_id, tournament_id, invite_id, type, meta } = req;
+  const {
+    id,
+    user_id,
+    team_id,
+    tournament_id,
+    invite_id,
+    type,
+    team_tag,
+    meta,
+  } = req;
 
   const query = db("team_memberships");
   const search = {};
@@ -81,6 +121,11 @@ export async function listTeamMemberships(
 
   if (type) {
     search["type"] = type;
+  }
+
+  if (team_tag) {
+    query.join("teams", "team_memberships.id", "teams.id");
+    search["teams.tag"] = team_tag;
   }
 
   query.where(search);
