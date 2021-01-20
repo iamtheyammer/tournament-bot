@@ -35,7 +35,7 @@ export function handleMeta(query: QueryBuilder, meta: DBQueryMeta): void {
 
 const db = knex({
   client: "pg",
-  connection: process.env.DATABASE_DSN,
+  connection: process.env.DATABASE_DSN || process.env.DATABASE_URL,
 });
 
 export default db;
