@@ -1,12 +1,15 @@
 import { Message, MessageEmbed } from "discord.js";
 import { fetchMojangUserProfile, fetchPlayerData } from "../apis";
-import { prefix, Args } from "../index";
+import { prefix } from "../index";
 import { isMinecraftUsername } from "../util/regex";
 import { insertUser, listUsers, updateUser } from "../db/users";
 import { errorEmbed, successEmbed, warnEmbed } from "../util/embeds";
 import { compareUuids, normalizeUuid } from "../util/uuid";
 
-export default async function link(msg: Message, args: Args): Promise<void> {
+export default async function link(
+  msg: Message,
+  args: Array<string>
+): Promise<void> {
   const username = args[2];
 
   if (!username) {

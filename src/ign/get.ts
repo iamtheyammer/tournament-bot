@@ -1,10 +1,13 @@
 import { Message } from "discord.js";
-import { Args, prefix } from "../index";
+import { prefix } from "../index";
 import { listUsers } from "../db/users";
 import { fetchMojangUserProfile } from "../apis";
 import { errorEmbed, successEmbed } from "../util/embeds";
 
-export default async function get(msg: Message, args: Args): Promise<void> {
+export default async function get(
+  msg: Message,
+  args: Array<string>
+): Promise<void> {
   if (
     (!msg.mentions.members || !msg.mentions.members.first()) &&
     !/^[0-9]+$/.test(args[2])
