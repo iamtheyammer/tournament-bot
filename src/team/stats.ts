@@ -41,13 +41,6 @@ export function calculateRating(stats: stats): number {
   }
   const score =
     fkdrPts + starPts + wlrPts + bblrPts + finalPts + bedPts + winPts;
-  console.log(fkdrPts);
-  console.log(starPts);
-  console.log(wlrPts);
-  console.log(bblrPts);
-  console.log(finalPts);
-  console.log(bedPts);
-  console.log(winPts);
   return score * 10;
 }
 
