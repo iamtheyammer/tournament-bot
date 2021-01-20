@@ -38,7 +38,10 @@ const local = process.env.NODE_ENV !== "production";
 
 const db = knex({
   client: "pg",
-  connection: `${databaseConnString}${local ? "" : "?ssl=true"}`,
+  connection: {
+    ssl: local ? false : { rejectUnauthorized: false },
+    connectionString: databaseConnString,
+  },
 });
 
 export default db;
