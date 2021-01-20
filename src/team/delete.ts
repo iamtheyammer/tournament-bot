@@ -155,6 +155,8 @@ export default async function deleteTeam(
     return;
   }
 
+  await msg.guild.roles.resolve(team.role_id).delete();
+
   await msg.reply(
     successEmbed()
       .setTitle(`\`[${team.tag}] ${team.name}\` has been deleted`)
