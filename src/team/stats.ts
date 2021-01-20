@@ -6,7 +6,23 @@ import { listTeamMemberships } from "../db/team_memberships";
 import { listUsers } from "../db/users";
 import { errorEmbed, infoEmbed } from "../util/embeds";
 
-export function calculateRating(stats): number {
+interface stats {
+  finals: number;
+  beds: number;
+  wins: number;
+  games: number;
+  fDeaths: number;
+  bLost: number;
+  losses: number;
+  fkdr: number;
+  bblr: number;
+  wlr: number;
+  winPercent: number;
+  rating: number;
+  stars: number;
+}
+
+export function calculateRating(stats: stats): number {
   let fkdrPts: number = -1 * (1000 / (stats.fkdr + 10)) + 2 * stats.fkdr + 100;
   const starPts: number = Math.pow(stats.stars, 0.65);
   let wlrPts: number = Math.pow(stats.wlr, 1.5) * 10;
