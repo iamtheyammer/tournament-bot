@@ -34,6 +34,6 @@
     "format": "prettier --write \"src/**/*.(j|t)s\"",
     "formatcheck": "prettier --config ./.prettierrc --check \"src/**/*.(j|t)s\"",
     "lint": "eslint \"src/**/*.[jt]s\"",
-    "heroku": "yarn compile && node dist/index.js"
+    "build": "yarn compile"
   }
 }
