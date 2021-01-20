@@ -89,7 +89,6 @@ interface DBTeamInviteListRequest {
   invited_user_id?: string | string[];
   inviter_user_id?: string;
   retracted?: boolean;
-
   meta?: DBTeamInviteListRequestMeta;
 }
 

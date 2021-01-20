@@ -107,6 +107,7 @@ export default async function create(
           "There was an error creating your team. Ask an admin to check the logs for more info.\nAnything created has been undone."
         )
     );
+    console.log(e);
     return;
   }
 
