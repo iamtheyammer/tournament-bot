@@ -86,7 +86,7 @@ export default async function stats(
     const player = await fetchBedwarsData(uuids[i]);
     stats.push(player);
   }
-  const teamData = {
+  const initTeamData = {
     finals: 0,
     beds: 0,
     wins: 0,
@@ -101,19 +101,22 @@ export default async function stats(
     rating: 0,
     stars: 0,
   };
-  for (let i = 0; i < stats.length; i++) {
-    teamData.finals += stats[i].finals;
-    teamData.beds += stats[i].beds;
-    teamData.wins += stats[i].wins;
-    teamData.games += stats[i].games;
-    teamData.fDeaths += stats[i].fDeaths;
-    teamData.bLost += stats[i].bLost;
-    teamData.losses += stats[i].losses;
-    teamData.fkdr += stats[i].fkdr;
-    teamData.bblr += stats[i].bblr;
-    teamData.wlr += stats[i].wlr;
-    teamData.stars += stats[i].stars;
-  }
+  const teamData = stats.reduce((acc, cur) => {
+    acc.finals += cur.finals;
+    acc.beds += cur.beds;
+    acc.wins += cur.wins;
+    acc.games += cur.games;
+    acc.fDeaths += cur.fDeaths;
+    acc.bLost += cur.bLost;
+    acc.losses += cur.losses;
+    acc.fkdr += cur.fkdr;
+    acc.bblr += cur.bblr;
+    acc.wlr += cur.wlr;
+    acc.stars += cur.stars;
+
+    return acc;
+  }, initTeamData);
+
   teamData.fkdr /= stats.length;
   teamData.bblr /= stats.length;
   teamData.wlr /= stats.length;
