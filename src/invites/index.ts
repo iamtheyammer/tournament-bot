@@ -40,9 +40,7 @@ export default async function invitesHandler(
         msg.channel.send(
           errorEmbed()
             .setTitle("No Team Invites")
-            .setDescription(
-              "You do not have any invites to a team. If you think this is a mistake, contact the team owners."
-            )
+            .setDescription("You do not have any team invites.")
         );
         return;
       }
@@ -63,10 +61,8 @@ export default async function invitesHandler(
       }
       msg.channel.send(
         successEmbed()
-          .setTitle("List of Invites")
-          .setDescription(
-            "All of the invites you have received from this tournament."
-          )
+          .setTitle("Team Invites")
+          .setDescription("Run `!team join <TAG>` to join one of these teams!")
           .addFields(fields)
       );
     }

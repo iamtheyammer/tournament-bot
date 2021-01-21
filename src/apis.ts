@@ -67,13 +67,12 @@ export async function fetchPlayerData(
   username: string
 ): Promise<HypixelPlayerResponse | null> {
   const resp = await axios({
-    url: "player",
+    url: "https://api.hypixel.net/player",
     params: {
       name: username,
       key: hypixelApiKey,
     },
     method: "GET",
-    baseURL: "https://api.hypixel.net/",
   });
 
   return resp.data.player as HypixelPlayerResponse;
@@ -84,13 +83,12 @@ export async function fetchBedwarsData(
   let resp: AxiosResponse;
   try {
     resp = await axios({
-      url: "player",
+      url: "https://api.hypixel.net/player",
       params: {
         uuid: uuid,
         key: hypixelApiKey,
       },
       method: "GET",
-      baseURL: "https://api.hypixel.net/",
     });
   } catch (e) {
     return {

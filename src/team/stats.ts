@@ -62,11 +62,7 @@ export default async function stats(
       return;
     }
   } else {
-    const userMembership = await listTeamMemberships({
-      user_id: msg.author.id,
-    });
-
-    if (!userMembership.length) {
+    if (!args.teamMembership) {
       await msg.channel.send(
         errorEmbed()
           .setTitle("No team found")
@@ -76,7 +72,7 @@ export default async function stats(
       );
       return;
     }
-    teams = await listTeams({ id: userMembership[0].team_id });
+    teams = await listTeams({ id: args.teamMembership[0].team_id });
   }
   const members = await listTeamMemberships({ team_id: teams[0].id });
   const memberIds = members.map((item) => item.user_id);

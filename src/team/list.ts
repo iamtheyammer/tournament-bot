@@ -6,21 +6,24 @@ import { infoEmbed } from "../util/embeds";
 
 export default async function list(msg: Message): Promise<void> {
   const tournament = await listTournaments({ meta: { active_only: true } });
-  const teams = await listTeams({ tournament_id: tournament[0].id });
+  const teams = await listTeams({
+    tournament_id: tournament[0].id,
+    meta: { limit: 10 },
+  });
   const fields = [];
-  for (let i = 0; i < teams.length; i++) {
+  teams.forEach(async (team) => {
     const leader = await listTeamMemberships({
-      team_id: teams[i].id,
+      team_id: team.id,
       type: "leader",
     });
     const data = {
-      name: `\`[${teams[i].tag}] ${teams[i].name}\``,
+      name: `\`[${team.tag}] ${team.name}\``,
       value: `Leader: <@${leader[0].user_id}>`,
       inline: true,
     };
     fields.push(data);
-  }
-  msg.channel.send(
+  });
+  await msg.channel.send(
     infoEmbed()
       .setTitle("List of Teams")
       .setDescription(
