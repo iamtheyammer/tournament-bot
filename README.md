@@ -1,4 +1,4 @@
-# d.craft Tournament Bot v1
+# d.craft Tournament Bot v1.1
 
 ## Introduction
 

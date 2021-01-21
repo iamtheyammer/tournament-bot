@@ -19,6 +19,7 @@ import edit from "./edit/index";
 import deleteTeam from "./delete";
 import stats from "./stats";
 import list from "./list";
+import help from "./help";
 
 export interface TeamArgs extends Args {
   teamMembership?: DBTeamMembership;
@@ -112,6 +113,10 @@ export default async function teamHandler(
     }
     case "list": {
       await list(msg);
+      break;
+    }
+    case "help": {
+      await help(msg);
       break;
     }
     default: {
