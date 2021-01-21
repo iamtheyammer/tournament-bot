@@ -11,18 +11,18 @@ export default async function list(msg: Message): Promise<void> {
     meta: { limit: 10 },
   });
   const fields = [];
-  teams.forEach(async (team) => {
+  for (let i = 0; i < teams.length; i++) {
     const leader = await listTeamMemberships({
-      team_id: team.id,
+      team_id: teams[i].id,
       type: "leader",
     });
     const data = {
-      name: `\`[${team.tag}] ${team.name}\``,
+      name: `\`[${teams[i].tag}] ${teams[i].name}\``,
       value: `Leader: <@${leader[0].user_id}>`,
       inline: true,
     };
     fields.push(data);
-  });
+  }
   await msg.channel.send(
     infoEmbed()
       .setTitle("List of Teams")
