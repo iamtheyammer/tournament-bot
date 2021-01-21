@@ -74,7 +74,6 @@ export async function fetchPlayerData(
     },
     method: "GET",
   });
-
   return resp.data.player as HypixelPlayerResponse;
 }
 export async function fetchBedwarsData(

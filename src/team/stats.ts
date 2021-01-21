@@ -72,7 +72,7 @@ export default async function stats(
       );
       return;
     }
-    teams = await listTeams({ id: args.teamMembership[0].team_id });
+    teams = await listTeams({ id: args.teamMembership.team_id });
   }
   const members = await listTeamMemberships({ team_id: teams[0].id });
   const memberIds = members.map((item) => item.user_id);

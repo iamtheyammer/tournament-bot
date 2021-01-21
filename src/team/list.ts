@@ -1,4 +1,4 @@
-import { Message } from "discord.js";
+import { EmbedFieldData, Message } from "discord.js";
 import { listTeams } from "../db/teams";
 import { listTeamMemberships } from "../db/team_memberships";
 import { listTournaments } from "../db/tournaments";
@@ -10,7 +10,7 @@ export default async function list(msg: Message): Promise<void> {
     tournament_id: tournament[0].id,
     meta: { limit: 10 },
   });
-  const fields = [];
+  const fields: EmbedFieldData[] = [];
   for (let i = 0; i < teams.length; i++) {
     const leader = await listTeamMemberships({
       team_id: teams[i].id,

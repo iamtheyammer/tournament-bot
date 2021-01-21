@@ -74,7 +74,7 @@ export async function deleteTeamMemberships(
 interface DBTeamMembershipListRequest {
   id?: number;
   user_id?: string | string[];
-  team_id?: number;
+  team_id?: number | number[];
   tournament_id?: number;
   invite_id?: number;
   type?: TeamMembershipType;

@@ -17,7 +17,14 @@ export default async function invite(
     );
     return;
   }
-
+  if (!msg.mentions.users.first()) {
+    await msg.channel.send(
+      errorEmbed()
+        .setTitle("No user provided")
+        .setDescription("You didn't give someone to invite.")
+    );
+    return;
+  }
   const inviteesIds = msg.mentions.users.map((u) => u.id);
 
   const [invitees, [team]] = await Promise.all([
