@@ -1,4 +1,4 @@
-import { Message } from "discord.js";
+import { CategoryChannel, Message } from "discord.js";
 import { TeamArgs } from "../index";
 import { errorEmbed, infoEmbed, successEmbed } from "../../util/embeds";
 import { listTeams, updateTeam } from "../../db/teams";
@@ -45,6 +45,21 @@ export default async function name(
   }
 
   await updateTeam({ name, where: { id: team.id } });
+  const teamCategory = msg.guild.channels.resolve(
+    team.category_id
+  ) as CategoryChannel;
+  await Promise.all([
+    ...teamCategory.children.map((c) => {
+      if (c.type === "voice") {
+        return c.setName(c.name.replace(team.name, name));
+      } else {
+        return c.setName(
+          c.name.replace(c.name, name.toLowerCase().replace(" ", "-"))
+        );
+      }
+    }),
+    teamCategory.setName(name),
+  ]);
 
   await msg.channel.send(
     successEmbed()

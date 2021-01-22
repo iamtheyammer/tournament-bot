@@ -8,7 +8,7 @@ export interface DBTeamMembership {
   user_id: string;
   team_id: number;
   tournament_id: number;
-  invite_id?: number;
+  invite_id?:  number;
   type: TeamMembershipType;
   inserted_at: string;
 }
@@ -108,7 +108,11 @@ export async function listTeamMemberships(
   }
 
   if (team_id) {
-    search["team_id"] = team_id;
+    if (typeof team_id === "number") {
+      search["team_id"] = team_id;
+    } else {
+      query.whereIn("team_id", team_id);
+    }
   }
 
   if (tournament_id) {

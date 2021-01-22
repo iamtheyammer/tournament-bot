@@ -31,7 +31,6 @@ export default async function invitesHandler(
   switch (args.splitCommandLower[1]) {
     default: {
       // List Invites
-      const teams = [];
       const invites = await listTeamInvites({
         invited_user_id: msg.author.id,
         meta: { valid_only: true },
@@ -44,21 +43,24 @@ export default async function invitesHandler(
         );
         return;
       }
-      for (let i = 0; i < invites.length; i++) {
-        const team = await listTeams({ id: invites[i].team_id });
-        teams.push(team);
-      }
-      const fields = [];
-      for (let i = 0; i < invites.length; i++) {
-        fields.push({
-          name: `Invitation to join: \`[${teams[0][i].tag}] ${teams[0][i].name}\``,
+
+      const teams = await listTeams({ id: invites.map((i) => i.team_id) });
+      const teamsById = teams.reduce((acc, cur) => {
+        acc[cur.id] = cur;
+        return acc;
+      }, {});
+
+      const fields = invites.map((invite) => {
+        const team = teamsById[invite.team_id];
+        console.log(team);
+        return {
+          name: `Invitation to join: \`[${team.tag}] ${team.name}\``,
           value: `Invited by: <@${
-            invites[i].inviter_user_id
-          }> | To join: \`${prefix}team join ${teams[0][
-            i
-          ].tag.toLowerCase()}\``,
-        });
-      }
+            invite.inviter_user_id
+          }> | To join: \`${prefix}team join ${team.tag.toLowerCase()}\``,
+        };
+      });
+
       msg.channel.send(
         successEmbed()
           .setTitle("Team Invites")

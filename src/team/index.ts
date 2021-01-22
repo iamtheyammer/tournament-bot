@@ -112,7 +112,7 @@ export default async function teamHandler(
       break;
     }
     case "list": {
-      await list(msg);
+      await list(msg, teamArgs);
       break;
     }
     case "help": {
