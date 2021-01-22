@@ -74,7 +74,7 @@ export async function deleteTeamMemberships(
 interface DBTeamMembershipListRequest {
   id?: number;
   user_id?: string | string[];
-  team_id?: number;
+  team_id?: number | number[];
   tournament_id?: number;
   invite_id?: number;
   type?: TeamMembershipType;
@@ -108,7 +108,11 @@ export async function listTeamMemberships(
   }
 
   if (team_id) {
-    search["team_id"] = team_id;
+    if (typeof team_id === "number") {
+      search["team_id"] = team_id;
+    } else {
+      query.whereIn("team_id", team_id);
+    }
   }
 
   if (tournament_id) {

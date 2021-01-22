@@ -2,7 +2,7 @@ import { Message } from "discord.js";
 import { listTeams } from "../db/teams";
 import { insertTeamInvite, listTeamInvites } from "../db/team_invites";
 import { TeamArgs } from "./index";
-import { errorEmbed, infoEmbed } from "../util/embeds";
+import { errorEmbed, infoEmbed, warnEmbed } from "../util/embeds";
 import { listUsers } from "../db/users";
 
 export default async function invite(
@@ -17,7 +17,14 @@ export default async function invite(
     );
     return;
   }
-
+  if (!msg.mentions.users.first()) {
+    await msg.channel.send(
+      errorEmbed()
+        .setTitle("No user provided")
+        .setDescription("You didn't give someone to invite.")
+    );
+    return;
+  }
   const inviteesIds = msg.mentions.users.map((u) => u.id);
 
   const [invitees, [team]] = await Promise.all([
@@ -94,24 +101,23 @@ export default async function invite(
           `You've been invited to \`[${team.tag}] ${team.name}\` by <@${msg.author.id}>! Head over to the tournaments server and use \`!team join ${team.tag}\`!\n
         If you're already in a team, you'll need to use \`!team leave\` first. You can see other teams you've been invited to with \`!invites\`.`
         );
-      const noDmMsg = `<@${u.id}> was invited, but we couldn't DM them. Tell them you've invited them!\n(<@${u.id}>, use \`!invites\` to see all your invites!)`;
-      const successMsg = `${u.username} was successfully invited! They recieved a DM from this bot.`;
-
-      if (!u.dmChannel) {
-        const ch = await u.createDM();
-        try {
-          await ch.send(embed);
-          await msg.reply(successMsg);
-        } catch {
-          await msg.reply(noDmMsg);
-        }
-      } else {
-        try {
-          await u.dmChannel.send(embed);
-          await msg.reply(successMsg);
-        } catch {
-          await msg.reply(noDmMsg);
-        }
+      try {
+        await u.send(embed);
+        await msg.channel.send(
+          infoEmbed()
+            .setTitle("Invite Successful")
+            .setDescription(
+              `<@${u.id}> was successfully invited! They received a DM from this bot.`
+            )
+        );
+      } catch {
+        await msg.channel.send(
+          warnEmbed()
+            .setTitle("Invite Successful")
+            .setDescription(
+              `<@${u.id}> was invited, but we couldn't DM them. Tell them you've invited them!\n(<@${u.id}>, use \`!invites\` to see all your invites!)`
+            )
+        );
       }
     }
   );

@@ -9,6 +9,7 @@ import { setupDatabase } from "./db/setup";
 import { DBUser, listUsers } from "./db/users";
 import { errorEmbed } from "./util/embeds";
 import tournamentHandler from "./tournament";
+import invitesHandler from "./invites";
 const client = new Discord.Client();
 const token = process.env.DISCORD_TOKEN;
 
@@ -69,6 +70,10 @@ client.on("message", async (msg) => {
       }
       case "tournament": {
         await tournamentHandler(msg, args);
+        break;
+      }
+      case "invites": {
+        await invitesHandler(msg, args);
         break;
       }
     }

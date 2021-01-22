@@ -20,7 +20,7 @@ export default async function deleteTeam(
   ]);
 
   if (memberships.length > 1) {
-    await msg.reply(
+    await msg.channel.send(
       errorEmbed()
         .setTitle("Team not empty")
         .setDescription(
@@ -31,7 +31,7 @@ export default async function deleteTeam(
     return;
   }
 
-  const confirmMessage = await msg.reply(
+  const confirmMessage = await msg.channel.send(
     warnEmbed()
       .setTitle(`Confirm deleting \`[${team.tag}] ${team.name}\``)
       .setDescription(
@@ -63,7 +63,7 @@ export default async function deleteTeam(
       args.currentTournament.participant_role_id,
     ]);
   } catch {
-    await msg.reply(
+    await msg.channel.send(
       errorEmbed()
         .setTitle("Error removing roles")
         .setDescription(
@@ -94,7 +94,7 @@ export default async function deleteTeam(
     await teamCategory.delete(`Team ID ${team.id} deletion`);
   } catch {
     await rollback();
-    await msg.reply(
+    await msg.channel.send(
       errorEmbed()
         .setTitle("Error removing channels")
         .setDescription(
@@ -114,7 +114,7 @@ export default async function deleteTeam(
     ]);
   } catch {
     await rollback();
-    await msg.reply(
+    await msg.channel.send(
       errorEmbed()
         .setTitle("Error removing invites and memberships")
         .setDescription(
@@ -128,7 +128,7 @@ export default async function deleteTeam(
     await deleteTeams({ id: team.id }, trx);
   } catch {
     await rollback();
-    await msg.reply(
+    await msg.channel.send(
       errorEmbed()
         .setTitle("Error removing the team")
         .setDescription(
@@ -143,7 +143,7 @@ export default async function deleteTeam(
     await trx.commit();
   } catch {
     await rollback();
-    await msg.reply(
+    await msg.channel.send(
       errorEmbed()
         .setTitle("Error saving deletions")
         .setDescription(
@@ -156,7 +156,7 @@ export default async function deleteTeam(
 
   await msg.guild.roles.resolve(team.role_id).delete();
 
-  await msg.reply(
+  await msg.channel.send(
     successEmbed()
       .setTitle(`\`[${team.tag}] ${team.name}\` has been deleted`)
       .setDescription(

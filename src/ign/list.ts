@@ -23,7 +23,7 @@ export default async function list(
     meta: {
       require_uuid: true,
       limit: 10,
-      offset: pageNum * 10,
+      offset: (pageNum - 1) * 10,
       order_by: { exp: "inserted_at", dir: "DESC" },
     },
   });

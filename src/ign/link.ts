@@ -80,7 +80,7 @@ export default async function link(
         warnEmbed()
           .setTitle("Already linked")
           .setDescription(
-            `<@${msg.author.id} is already linked to \`${ign}\`. Use \`${prefix}ign unlink\`, then run this command again.`
+            `<@${msg.author.id}> is already linked to \`${ign}\`. Use \`${prefix}ign unlink\`, then run this command again.`
           )
       );
       return;

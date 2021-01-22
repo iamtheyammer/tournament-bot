@@ -132,7 +132,7 @@ export async function deleteTeams(
 }
 
 interface DBListTeamsRequest {
-  id?: number;
+  id?: number | number[];
   tournament_id?: number;
   tag?: string;
   name?: string;
@@ -150,7 +150,11 @@ export async function listTeams(
   const query = database("teams");
 
   if (req.id) {
-    query.where({ id: req.id });
+    if (typeof req.id === "number") {
+      query.where({ id: req.id });
+    } else {
+      query.whereIn("id", req.id);
+    }
   }
 
   if (req.tournament_id) {

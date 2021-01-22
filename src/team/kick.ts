@@ -13,7 +13,7 @@ export default async function kick(
   args: TeamArgs
 ): Promise<void> {
   if (msg.mentions.members.size < 1) {
-    await msg.reply(
+    await msg.channel.send(
       errorEmbed()
         .setTitle("Missing user mention")
         .setDescription(
@@ -35,7 +35,7 @@ export default async function kick(
   ]);
 
   if (!memberships.length) {
-    await msg.reply(
+    await msg.channel.send(
       errorEmbed()
         .setTitle("User not in team")
         .setDescription(`<@${toKick.id}> isn't in your team!`)
@@ -44,7 +44,7 @@ export default async function kick(
   }
 
   if (memberships[0].id === args.teamMembership.id) {
-    await msg.reply(
+    await msg.channel.send(
       errorEmbed()
         .setTitle("Can't kick yourself")
         .setDescription("Try `!team leave`.")
@@ -54,7 +54,7 @@ export default async function kick(
 
   const kickReason = args.splitCommand[3] || "No reason specified.";
 
-  const kickConfirmMessage = await msg.reply(
+  const kickConfirmMessage = await msg.channel.send(
     infoEmbed()
       .setTitle(`Confirm kicking ${toKick.tag}`)
       .setDescription(
@@ -86,7 +86,7 @@ export default async function kick(
       args.currentTournament.participant_role_id,
     ]);
   } catch (e) {
-    await msg.reply(
+    await msg.channel.send(
       errorEmbed()
         .setTitle("Error removing roles")
         .setDescription(
@@ -103,7 +103,7 @@ export default async function kick(
       team.role_id,
       args.currentTournament.participant_role_id,
     ]);
-    await msg.reply(
+    await msg.channel.send(
       errorEmbed()
         .setTitle("Error deleting team membership")
         .setDescription(
@@ -114,7 +114,7 @@ export default async function kick(
   }
 
   try {
-    await toKick.dmChannel.send(
+    await toKick.send(
       infoEmbed()
         .setTitle(`Kicked from \`\`[${team.tag}] ${team.name}\`\``)
         .setDescription(
@@ -138,7 +138,7 @@ export default async function kick(
       .addField("Reason for kick:", kickReason)
   );
 
-  await msg.reply(
+  await msg.channel.send(
     successEmbed()
       .setTitle(`Successfully kicked ${toKick.tag}`)
       .setDescription(

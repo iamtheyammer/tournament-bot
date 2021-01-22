@@ -17,6 +17,9 @@ import transfer from "./transfer";
 import kick from "./kick";
 import edit from "./edit/index";
 import deleteTeam from "./delete";
+import stats from "./stats";
+import list from "./list";
+import help from "./help";
 
 export interface TeamArgs extends Args {
   teamMembership?: DBTeamMembership;
@@ -104,6 +107,18 @@ export default async function teamHandler(
       await deleteTeam(msg, teamArgs);
       break;
     }
+    case "stats": {
+      await stats(msg, teamArgs);
+      break;
+    }
+    case "list": {
+      await list(msg, teamArgs);
+      break;
+    }
+    case "help": {
+      await help(msg);
+      break;
+    }
     default: {
       await msg.channel.send(
         errorEmbed()
@@ -130,7 +145,7 @@ export async function requireTeamMembership(
   args: TeamArgs
 ): Promise<boolean> {
   if (!args.teamMembership) {
-    await msg.reply(
+    await msg.channel.send(
       errorEmbed()
         .setTitle("No team")
         .setDescription(
@@ -150,7 +165,7 @@ export async function requireLeaderMembership(
   if (!(await requireTeamMembership(msg, args))) return false;
 
   if (args.teamMembership.type !== "leader") {
-    await msg.reply(
+    await msg.channel.send(
       errorEmbed()
         .setTitle("Insufficient permissions")
         .setDescription("You must be the team leader to execute that command.")
