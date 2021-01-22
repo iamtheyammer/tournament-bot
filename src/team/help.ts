@@ -45,7 +45,11 @@ export default async function help(msg: Message): Promise<void> {
         },
         {
           name: `\`!team party [TAG]\``,
-          value: `Get the party command for your team.`,
+          value: `Get the party command for a team.`,
+        },
+        {
+          name: `\`!team stats [TAG]\``,
+          value: `Get the collective stats of a team.`,
         }
       )
   );

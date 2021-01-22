@@ -46,15 +46,15 @@ These commands are meant to allow users to create, modify, and delete teams, whi
 
 `!team leave`: Leaves the team you're currently in. Only works if you are not the leader of the team.
 
+`!team stats`: Allows you to view the collective stats of a team. If no tag is put, the team grabbed is the one you're currently in.
+
+`!team help`: View this list of commands.
+
+### Other commands
+
+`!invites`: View all valid invites from every team you've gotten one from.
+
 ## Goals/ideas to implement
-
-### Teams Subcommands
-
-These commands should allow display, creation, modification and deletion of tournament teams. Players can create teams and invite other users to their team. A full list of teams should be able to be displayed if queried for.
-
-| Command     | Purpose                                           | Syntax            | Completed? |
-| ----------- | ------------------------------------------------- | ----------------- | ---------- |
-| !team stats | Allows you to view the collective stats of a team | !team stats <tag> | started    |
 
 ### Help Subcommands
 
