@@ -1,7 +1,6 @@
 import axios, { AxiosResponse } from "axios";
+import { calculateBedwarsStars } from "./bundles/team_stats";
 import { hypixelApiKey } from "./index";
-
-const xpPerPrestige = 487000;
 
 interface HypixelPlayerResponse {
   displayname: string;
@@ -29,38 +28,6 @@ interface PlayerStatsResponse {
   wlr?: number;
   bblr?: number;
   winstreak?: number;
-}
-
-export function calculateBedwarsStars(exp: number): number {
-  const prestiges = Math.floor(exp / xpPerPrestige);
-  let remainder = exp % xpPerPrestige;
-
-  let numStars = prestiges * 100;
-
-  if (remainder >= 500) {
-    remainder = remainder - 500;
-    numStars++;
-  }
-
-  if (remainder >= 1000) {
-    remainder = remainder - 1000;
-    numStars++;
-  }
-
-  if (remainder >= 2000) {
-    remainder = remainder - 2000;
-    numStars++;
-  }
-
-  if (remainder >= 3500) {
-    remainder = remainder - 3500;
-    numStars++;
-  }
-
-  if (remainder >= 5000) {
-    numStars = numStars + Math.floor(remainder / 5000);
-  }
-  return numStars;
 }
 
 export async function fetchPlayerData(
@@ -94,14 +61,7 @@ export async function fetchBedwarsData(
       error: e,
     };
   }
-
   const stats = resp.data.player;
-  if (!stats) {
-    return {
-      error: "Invalid username.",
-    };
-  }
-
   const bedwars = stats.stats.Bedwars;
   let fkdr = bedwars.final_kills_bedwars / bedwars.final_deaths_bedwars;
   let wlr = bedwars.wins_bedwars / bedwars.losses_bedwars;

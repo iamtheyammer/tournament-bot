@@ -32,7 +32,6 @@ export default async function list(
     acc[cur.team_id] = cur;
     return acc;
   }, {});
-
   const fields = teams.map((team) => ({
     name: `\`[${team.tag}] ${team.name}\``,
     value: `Leader: <@${leaderById[team.id].user_id}>`,

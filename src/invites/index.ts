@@ -52,7 +52,6 @@ export default async function invitesHandler(
 
       const fields = invites.map((invite) => {
         const team = teamsById[invite.team_id];
-        console.log(team);
         return {
           name: `Invitation to join: \`[${team.tag}] ${team.name}\``,
           value: `Invited by: <@${
