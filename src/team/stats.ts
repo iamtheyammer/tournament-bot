@@ -118,7 +118,7 @@ export default async function stats(
   teamData.winPercent = (teamData.wlr * 100) / (teamData.wlr + 1);
   teamData.rating = calculateRating(teamData);
   Object.keys(teamData).map(function (key) {
-    if (!(teamData[key] === Math.round(teamData[key]))) {
+    if (teamData[key] !== Math.round(teamData[key])) {
       teamData[key] = parseFloat(teamData[key].toFixed(2));
     }
   });
