@@ -1,4 +1,4 @@
-import { fetchBedwarsData } from "../apis";
+import { fetchBedwarsData, PlayerStatsResponse } from "../apis";
 import { DBTeam } from "../db/teams";
 import { listTeamMemberships } from "../db/team_memberships";
 import { listUsers } from "../db/users";
@@ -79,10 +79,18 @@ export default async function getTeamStats(teams: DBTeam[]): Promise<Stats> {
   const members = await listTeamMemberships({ team_id: teams[0].id });
   const memberIds = members.map((item) => item.user_id);
   const uuids = await listUsers({ discord_id: memberIds });
-  const stats = await Promise.all(
+  const initStats = await Promise.all(
     uuids.map((u) => fetchBedwarsData(u.minecraft_uuid))
   );
-
+  const stats: PlayerStatsResponse[] = initStats.map((stats) => {
+    Object.values(stats).map((value) => {
+      if (isNaN(value)) {
+        value = 0;
+      }
+    });
+    return stats;
+  });
+  console.log(stats);
   const initTeamData = {
     finals: 0,
     beds: 0,

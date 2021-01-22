@@ -12,7 +12,7 @@ interface HypixelPlayerResponse {
   };
 }
 
-interface PlayerStatsResponse {
+export interface PlayerStatsResponse {
   error?: string;
   username?: string;
   playerUuid?: string;
