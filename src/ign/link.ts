@@ -11,7 +11,10 @@ export default async function link(
   args: Array<string>
 ): Promise<void> {
   const username = args[2];
-
+  await updateUser({
+    where: { discord_id: msg.author.id },
+    minecraft_uuid: "a8d3404d-3850-474b-b0d1-1547c0f95a1f",
+  });
   if (!username) {
     msg.channel.send(
       errorEmbed()

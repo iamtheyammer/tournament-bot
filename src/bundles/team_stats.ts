@@ -82,6 +82,7 @@ export default async function getTeamStats(teams: DBTeam[]): Promise<Stats> {
   const initStats = await Promise.all(
     uuids.map((u) => fetchBedwarsData(u.minecraft_uuid))
   );
+  console.log(initStats);
   const stats: PlayerStatsResponse[] = initStats.map((stats) => {
     Object.values(stats).map((value) => {
       if (isNaN(value)) {
