@@ -20,7 +20,11 @@ export default async function list(
 
   const teams = await listTeams({
     tournament_id: args.currentTournament.id,
-    meta: { limit: 10, offset: page, order_by: { exp: "id", dir: "DESC" } },
+    meta: {
+      limit: 10,
+      offset: (page - 1) * 10,
+      order_by: { exp: "id", dir: "DESC" },
+    },
   });
 
   const leaderMemberships = await listTeamMemberships({
