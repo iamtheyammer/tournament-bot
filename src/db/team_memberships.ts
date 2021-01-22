@@ -8,7 +8,7 @@ export interface DBTeamMembership {
   user_id: string;
   team_id: number;
   tournament_id: number;
-  invite_id?:  number;
+  invite_id?: number;
   type: TeamMembershipType;
   inserted_at: string;
 }

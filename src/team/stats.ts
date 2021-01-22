@@ -76,16 +76,11 @@ export default async function stats(
   }
   const members = await listTeamMemberships({ team_id: teams[0].id });
   const memberIds = members.map((item) => item.user_id);
-  const uuids = [];
-  for (let i = 0; i < memberIds.length; i++) {
-    const uuid = await listUsers({ discord_id: memberIds[i] });
-    uuids.push(uuid[0].minecraft_uuid);
-  }
-  const stats = [];
-  for (let i = 0; i < uuids.length; i++) {
-    const player = await fetchBedwarsData(uuids[i]);
-    stats.push(player);
-  }
+  const uuids = await listUsers({ discord_id: memberIds });
+  const stats = await Promise.all(
+    uuids.map((u) => fetchBedwarsData(u.minecraft_uuid))
+  );
+
   const initTeamData = {
     finals: 0,
     beds: 0,

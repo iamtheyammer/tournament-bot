@@ -101,21 +101,23 @@ export default async function invite(
           `You've been invited to \`[${team.tag}] ${team.name}\` by <@${msg.author.id}>! Head over to the tournaments server and use \`!team join ${team.tag}\`!\n
         If you're already in a team, you'll need to use \`!team leave\` first. You can see other teams you've been invited to with \`!invites\`.`
         );
-      const noDmMsg = warnEmbed()
-        .setTitle("Invite Successful")
-        .setDescription(
-          `<@${u.id}> was invited, but we couldn't DM them. Tell them you've invited them!\n(<@${u.id}>, use \`!invites\` to see all your invites!)`
-        );
-      const successMsg = infoEmbed()
-        .setTitle("Invite Successful")
-        .setDescription(
-          `<@${u.id}> was successfully invited! They received a DM from this bot.`
-        );
       try {
         await u.send(embed);
-        await msg.channel.send(successMsg);
+        await msg.channel.send(
+          infoEmbed()
+            .setTitle("Invite Successful")
+            .setDescription(
+              `<@${u.id}> was successfully invited! They received a DM from this bot.`
+            )
+        );
       } catch {
-        await msg.channel.send(noDmMsg);
+        await msg.channel.send(
+          warnEmbed()
+            .setTitle("Invite Successful")
+            .setDescription(
+              `<@${u.id}> was invited, but we couldn't DM them. Tell them you've invited them!\n(<@${u.id}>, use \`!invites\` to see all your invites!)`
+            )
+        );
       }
     }
   );
