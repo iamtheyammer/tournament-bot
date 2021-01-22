@@ -1,5 +1,8 @@
 import axios, { AxiosResponse } from "axios";
-import { calculateBedwarsStars } from "./bundles/team_stats";
+import {
+  calculateBedwarsStars,
+  calculateSkywarsLevel,
+} from "./bundles/team_stats";
 import { hypixelApiKey } from "./index";
 
 interface HypixelPlayerResponse {
@@ -12,7 +15,7 @@ interface HypixelPlayerResponse {
   };
 }
 
-export interface PlayerStatsResponse {
+export interface BedwarsStatsResponse {
   error?: string;
   username?: string;
   playerUuid?: string;
@@ -30,6 +33,20 @@ export interface PlayerStatsResponse {
   winstreak?: number;
 }
 
+export interface SkywarsStatsResponse {
+  error?: string;
+  username?: string;
+  playerUuid?: string;
+  kills?: number;
+  deaths?: number;
+  kdr?: number;
+  wins?: number;
+  losses?: number;
+  wlr?: number;
+  games?: number;
+  level?: number;
+}
+
 export async function fetchPlayerData(
   username: string
 ): Promise<HypixelPlayerResponse | null> {
@@ -45,7 +62,7 @@ export async function fetchPlayerData(
 }
 export async function fetchBedwarsData(
   uuid: string
-): Promise<PlayerStatsResponse | null> {
+): Promise<BedwarsStatsResponse | null> {
   let resp: AxiosResponse;
   try {
     resp = await axios({
@@ -103,6 +120,57 @@ export async function fetchBedwarsData(
     wlr,
     bblr,
     winstreak,
+  };
+}
+
+export async function fetchSkywarsData(
+  uuid: string
+): Promise<SkywarsStatsResponse | null> {
+  let resp: AxiosResponse;
+  try {
+    resp = await axios({
+      url: "https://api.hypixel.net/player",
+      params: {
+        uuid: uuid,
+        key: hypixelApiKey,
+      },
+      method: "GET",
+    });
+  } catch (e) {
+    return {
+      error: e,
+    };
+  }
+  const stats = resp.data.player;
+  const skywars = stats.stats.SkyWars;
+
+  let kdr = skywars.kills / skywars.deaths;
+  let wlr = skywars.wins / skywars.losses;
+  if (isNaN(kdr)) {
+    if (!skywars.deaths) {
+      kdr = skywars.final_kills_bedwars;
+    } else {
+      kdr = 0;
+    }
+  }
+  if (isNaN(wlr)) {
+    if (!skywars.losses) {
+      wlr = skywars.wins;
+    } else {
+      wlr = 0;
+    }
+  }
+  return {
+    username: stats.displayname,
+    playerUuid: stats.uuid,
+    kills: skywars.kills,
+    deaths: skywars.deaths,
+    kdr,
+    wins: skywars.wins,
+    losses: skywars.losses,
+    wlr,
+    games: skywars.games,
+    level: calculateSkywarsLevel(skywars.skywars_experience),
   };
 }
 
