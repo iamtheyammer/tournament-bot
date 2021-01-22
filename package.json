@@ -32,7 +32,7 @@
     "start": "nodemon -r dotenv/config -e js,ts,json --watch src --exec \"yarn compile && node\" dist/index.js",
     "compile": "tsc --outDir dist",
     "format": "prettier --write \"src/**/*.(j|t)s\"",
-    "formatcheck": "prettier --config ./.prettierrc --check \"src/**/*.(j|t)s\"",
+    "formatcheck": "prettier --check \"src/**/*.(j|t)s\"",
     "lint": "eslint \"src/**/*.[jt]s\"",
     "build": "yarn compile"
   }
