@@ -70,7 +70,7 @@ export default async function bw(msg: Message, args: Args): Promise<void> {
       .setDescription(
         `All of the bedwars stats for \`${name}\` are placed here.`
       )
-      .setThumbnail(`https://crafatar.com/renders/body/${uuid}`)
+      .setThumbnail(`https://crafatar.com/renders/body/${uuid}?overlay`)
       .addFields(
         {
           name: `Games:`,
