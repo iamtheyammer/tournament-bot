@@ -97,7 +97,7 @@ interface SkywarsStats {
   rating: number;
 }
 
-export function calculateBedwarsRating(stats: BedwarsStats): number {
+export function calculateBedwarsRating(stats: BedwarsStatsResponse): number {
   let fkdrPts: number = -1 * (1000 / (stats.fkdr + 10)) + 2 * stats.fkdr + 100;
   const starPts: number = Math.pow(stats.stars, 0.65);
   let wlrPts: number = Math.pow(stats.wlr, 1.5) * 10;
@@ -119,12 +119,12 @@ export function calculateBedwarsRating(stats: BedwarsStats): number {
   return score * 10;
 }
 
-export function calculateSkywarsRating(stats: SkywarsStats): number {
+export function calculateSkywarsRating(stats: SkywarsStatsResponse): number {
   const kdrPts: number = 32 * Math.pow(stats.kdr, 1.8);
   const levelPts: number = Math.pow(stats.level, 1.5);
-  const wlrPts: number = Math.pow(10, stats.wlr * 5) - 1;
-  const killPts: number = stats.kills / 350;
-  const winPts: number = stats.wins / 70;
+  const wlrPts: number = Math.pow(15, stats.wlr * 3 + 0.5) - 1;
+  const killPts: number = stats.kills / 300;
+  const winPts: number = stats.wins / 60;
   const score = kdrPts + levelPts + wlrPts + killPts + winPts;
   return score * 10;
 }

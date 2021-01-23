@@ -19,7 +19,7 @@ import edit from "./edit/index";
 import deleteTeam from "./delete";
 import list from "./list";
 import help from "./help";
-import stats from "./stats";
+import stats from "./stats/index";
 
 export interface TeamArgs extends Args {
   teamMembership?: DBTeamMembership;

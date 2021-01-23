@@ -183,6 +183,11 @@ interface MojangUserProfile {
   }[];
 }
 
+interface MojangUuidProfile {
+  name: string;
+  id: string;
+}
+
 interface MojangUserProfileError {
   error: string;
   path: string;
@@ -201,4 +206,17 @@ export async function fetchMojangUserProfile(
   }
 
   return req.data as MojangUserProfile;
+}
+
+export async function fetchMojangUuidProfile(username: string): Promise<MojangUuidProfile> {
+  const req = await axios({
+    method: "get",
+    url: `https://api.mojang.com/users/profiles/minecraft/${username}`,
+  });
+
+  if (req.data.error) {
+    throw req.data as MojangUserProfileError;
+  }
+
+  return req.data as MojangUuidProfile;
 }

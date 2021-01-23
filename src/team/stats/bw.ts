@@ -10,7 +10,6 @@ export default async function bw(
   teams: DBTeam[]
 ): Promise<void> {
   await msg.react("👍");
-
   const teamData = await getTeamBedwarsStats(teams);
   msg.channel.send(
     infoEmbed()

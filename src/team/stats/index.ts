@@ -10,7 +10,6 @@ export default async function stats(
   msg: Message,
   args: TeamArgs
 ): Promise<void> {
-  console.log(args);
   let teams;
   if (args.splitCommand[3]) {
     const specifiedTag = args.splitCommandLower[3].toUpperCase();
