@@ -30,7 +30,6 @@ export interface BedwarsStatsResponse {
   losses?: number;
   wlr?: number;
   bblr?: number;
-  winstreak?: number;
 }
 
 export interface SkywarsStatsResponse {
@@ -80,10 +79,44 @@ export async function fetchBedwarsData(
   }
   const stats = resp.data.player;
   const bedwars = stats.stats.Bedwars;
+  if (!bedwars) {
+    return {
+      username: stats.displayname,
+      playerUuid: stats.uuid,
+      fkdr: 0,
+      stars: 0,
+      finals: 0,
+      wins: 0,
+      beds: 0,
+      games: 0,
+      fDeaths: 0,
+      bLost: 0,
+      losses: 0,
+      wlr: 0,
+      bblr: 0,
+    };
+  }
+  if (!bedwars.final_kills_bedwars) {
+    bedwars.final_kills_bedwars = 0;
+  }
+  if (!bedwars.wins_bedwars) {
+    bedwars.wins_bedwars = 0;
+  }
+  if (!bedwars.beds_broken_bedwars) {
+    bedwars.beds_broken_bedwars = 0;
+  }
+  if (!bedwars.final_deaths_bedwars) {
+    bedwars.final_deaths_bedwars = 0;
+  }
+  if (!bedwars.losses_bedwars) {
+    bedwars.losses_bedwars = 0;
+  }
+  if (!bedwars.beds_lost_bedwars) {
+    bedwars.beds_lost_bedwars = 0;
+  }
   let fkdr = bedwars.final_kills_bedwars / bedwars.final_deaths_bedwars;
   let wlr = bedwars.wins_bedwars / bedwars.losses_bedwars;
   let bblr = bedwars.beds_broken_bedwars / bedwars.beds_lost_bedwars;
-  const winstreak = bedwars.winstreak;
   if (isNaN(fkdr)) {
     if (!bedwars.final_deaths_bedwars) {
       fkdr = bedwars.final_kills_bedwars;
@@ -119,7 +152,6 @@ export async function fetchBedwarsData(
     losses: bedwars.losses_bedwars,
     wlr,
     bblr,
-    winstreak,
   };
 }
 
