@@ -120,11 +120,11 @@ export function calculateBedwarsRating(stats: BedwarsStatsResponse): number {
 }
 
 export function calculateSkywarsRating(stats: SkywarsStatsResponse): number {
-  const kdrPts: number = 32 * Math.pow(stats.kdr, 1.8);
+  const kdrPts: number = 16 * Math.pow(stats.kdr, 1.8);
   const levelPts: number = Math.pow(stats.level, 1.5);
   const wlrPts: number = Math.pow(15, stats.wlr * 3 + 0.5) - 1;
-  const killPts: number = stats.kills / 300;
-  const winPts: number = stats.wins / 60;
+  const killPts: number = stats.kills / 250;
+  const winPts: number = stats.wins / 50;
   const score = kdrPts + levelPts + wlrPts + killPts + winPts;
   return score * 10;
 }
