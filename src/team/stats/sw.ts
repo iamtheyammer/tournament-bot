@@ -15,7 +15,7 @@ export default async function sw(
     infoEmbed()
       .setTitle(`Collective Stats for \`[${teams[0].tag}] ${teams[0].name}\``)
       .setDescription(
-        `All of the collective stats for \`[${teams[0].tag}] ${teams[0].name}\` will be placed here.`
+        `All of the collective skywars hastats for \`[${teams[0].tag}] ${teams[0].name}\` will be placed here.`
       )
       .addFields(
         {

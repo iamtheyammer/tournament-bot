@@ -15,7 +15,7 @@ export default async function bw(
     infoEmbed()
       .setTitle(`Collective Stats for \`[${teams[0].tag}] ${teams[0].name}\``)
       .setDescription(
-        `All of the collective stats for \`[${teams[0].tag}] ${teams[0].name}\` will be placed here.`
+        `All of the collective bedwars stats for \`[${teams[0].tag}] ${teams[0].name}\` will be placed here.`
       )
       .addFields(
         {
