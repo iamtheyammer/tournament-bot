@@ -12,7 +12,7 @@ import { calculateBedwarsRating } from "../bundles/team_stats";
 
 function invalidUser() {
   return errorEmbed()
-    .setTitle("Invalid user specified")
+    .setTitle("Invalid User Specified")
     .setDescription("You didn't specify a valid player to grab the stats of.");
 }
 
@@ -22,7 +22,13 @@ export default async function bw(msg: Message, args: Args): Promise<void> {
   if (msg.mentions.members.first()) {
     user = await listUsers({ discord_id: msg.mentions.members.first().id });
     if (!user.length) {
-      msg.channel.send(invalidUser());
+      msg.channel.send(
+        errorEmbed()
+          .setTitle("User Hasn't Linked IGN to Discord")
+          .setDescription(
+            `<@${msg.mentions.members.first()}> hasn't linked their discord to Hypixel yet.`
+          )
+      );
       return;
     }
     uuid = user[0].minecraft_uuid;

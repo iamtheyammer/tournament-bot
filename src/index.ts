@@ -40,7 +40,7 @@ const currentTournament = currentTournaments[0];
 */
 
 client.on("message", async (msg) => {
-  if (msg.author.bot || !msg.content.startsWith(prefix)) return;
+  if (msg.author.bot || !msg.content.startsWith(prefix) || !msg.guild) return;
   const splitCommand = splitargs(msg.content).map((a, idx) =>
     idx === 0 ? a.slice(1) : a
   );
