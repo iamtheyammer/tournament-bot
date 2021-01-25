@@ -240,7 +240,9 @@ export async function fetchMojangUserProfile(
   return req.data as MojangUserProfile;
 }
 
-export async function fetchMojangUuidProfile(username: string): Promise<MojangUuidProfile> {
+export async function fetchMojangUuidProfile(
+  username: string
+): Promise<MojangUuidProfile> {
   const req = await axios({
     method: "get",
     url: `https://api.mojang.com/users/profiles/minecraft/${username}`,
