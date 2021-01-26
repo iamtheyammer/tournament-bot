@@ -65,6 +65,7 @@ client.on("message", async (msg) => {
         await ignHandler(msg, args);
         break;
       }
+      case "teams":
       case "team": {
         await teamHandler(msg, args);
         break;
