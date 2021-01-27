@@ -168,9 +168,9 @@ async function setupTeamMembershipsTable(
 async function setupParticipantsTable(
   trx: Knex.Transaction
 ): Promise<DatabaseChangeType> {
-  const usersTableExists = await trx.schema.hasTable("users");
+  const participantsTableExists = await trx.schema.hasTable("participants");
 
-  if (usersTableExists) {
+  if (participantsTableExists) {
     // we might need to check for certain columns in the future
 
     return "unchanged";

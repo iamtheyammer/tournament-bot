@@ -32,7 +32,7 @@ export default async function join(
     discord_id: msg.author.id,
     tournament_id: args.currentTournament.id,
   });
-  if (!participant.length) {
+  if (participant.length) {
     msg.channel.send(
       errorEmbed()
         .setTitle("Already Joined")
@@ -40,6 +40,7 @@ export default async function join(
           "You cannot join this tournament again because you have already joined this tournament."
         )
     );
+    return;
   }
   await insertParticipant({
     tournament_id: args.currentTournament.id,

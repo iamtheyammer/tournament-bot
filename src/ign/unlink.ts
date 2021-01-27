@@ -1,5 +1,5 @@
 import { Message } from "discord.js";
-import { listUsers, updateUser } from "../db/users";
+import { deleteUser, listUsers } from "../db/users";
 import { errorEmbed, successEmbed } from "../util/embeds";
 
 export default async function unlink(msg: Message): Promise<void> {
@@ -16,11 +16,7 @@ export default async function unlink(msg: Message): Promise<void> {
     );
     return;
   }
-
-  await updateUser({
-    where: { discord_id: msg.author.id },
-    minecraft_uuid: null,
-  });
+  await deleteUser({ discord_id: users[0].discord_id });
 
   msg.channel.send(
     successEmbed()
