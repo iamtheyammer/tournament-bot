@@ -17,9 +17,9 @@ import transfer from "./transfer";
 import kick from "./kick";
 import edit from "./edit/index";
 import deleteTeam from "./delete";
-import stats from "./stats";
 import list from "./list";
 import help from "./help";
+import stats from "./stats/index";
 
 export interface TeamArgs extends Args {
   teamMembership?: DBTeamMembership;

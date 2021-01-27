@@ -102,7 +102,7 @@ export default async function link(
       successEmbed()
         .setTitle("Successfully linked!")
         .setDescription(
-          `Updated the user linked to <@${msg.author.id} from \`${oldMojangUserProfile.name}\` to \`${ign}\`.`
+          `Updated the user linked to <@${msg.author.id}> from \`${oldMojangUserProfile.name}\` to \`${ign}\`.`
         )
     );
   }

@@ -1,3 +1,4 @@
+import { Transaction } from "knex";
 import db, { DBQueryMeta, handleMeta } from "./index";
 
 export interface DBUser {
@@ -24,6 +25,15 @@ export async function updateUser(req: DBUserUpdateRequest): Promise<void> {
     .update({ minecraft_uuid: req.minecraft_uuid });
 }
 
+interface DBUserListRequestMeta extends DBQueryMeta {
+  require_uuid?: boolean;
+}
+
+interface DBUserListRequest {
+  discord_id?: string | string[];
+  minecraft_uuid?: string | string[];
+  meta?: DBUserListRequestMeta;
+}
 interface DBUserListRequestMeta extends DBQueryMeta {
   require_uuid?: boolean;
 }
@@ -60,4 +70,15 @@ export async function listUsers(req: DBUserListRequest): Promise<DBUser[]> {
   }
 
   return await query;
+}
+
+interface DBUserDeleteRequest {
+  discord_id?: string;
+}
+
+export async function deleteUser(
+  req: DBUserDeleteRequest,
+  database: Transaction = db
+): Promise<void> {
+  await database("users").where(req).del();
 }

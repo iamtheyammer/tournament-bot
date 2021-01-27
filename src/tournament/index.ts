@@ -2,6 +2,8 @@ import { Message } from "discord.js";
 import { Args } from "../index";
 import { DBTournament, listTournaments } from "../db/tournaments";
 import currentInfo from "./current_info";
+import join from "./join";
+import leave from "./leave";
 
 export interface TournamentArgs extends Args {
   currentTournament?: DBTournament;
@@ -20,6 +22,14 @@ export default async function tournamentHandler(
   }
 
   switch (args.splitCommandLower[1]) {
+    case "join": {
+      await join(msg, tournamentArgs);
+      break;
+    }
+    case "leave": {
+      await leave(msg, tournamentArgs);
+      break;
+    }
     default: {
       await currentInfo(msg, tournamentArgs);
       break;
