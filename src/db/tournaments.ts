@@ -9,6 +9,7 @@ export interface DBTournament {
   opens_at: Date;
   starts_at: Date;
   participant_role_id: string;
+  team_selection_type: "manual" | "random";
   inserted_at: Date;
 }
 
@@ -20,6 +21,7 @@ interface DBTournamentInsertRequest {
   opens_at?: Date;
   starts_at?: Date;
   participant_role_id?: string;
+  team_selection_type: "manual" | "random";
 }
 
 export async function insertTournament(
@@ -38,7 +40,7 @@ interface DBTournamentUpdateRequest {
   opens_at?: Date;
   starts_at?: Date;
   participant_role_id?: string;
-
+  team_selection_type: "manual" | "random";
   where: {
     id?: number;
     short_name?: string;
@@ -56,6 +58,7 @@ export async function updateTournament(
     opens_at,
     starts_at,
     participant_role_id,
+    team_selection_type,
     where,
   } = req;
 
@@ -85,6 +88,10 @@ export async function updateTournament(
 
   if (starts_at) {
     update["starts_at"] = starts_at;
+  }
+
+  if (team_selection_type) {
+    update["team_selection_type"] = team_selection_type;
   }
 
   if (participant_role_id) {

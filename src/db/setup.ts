@@ -13,6 +13,7 @@ export async function setupDatabase(): Promise<DatabaseSetupResult> {
   const teamsStatus = await setupTeamsTable(trx);
   const teamInvitesStatus = await setupTeamInvitesTable(trx);
   const teamMembershipsStatus = await setupTeamMembershipsTable(trx);
+  const participantsStatus = await setupParticipantsTable(trx);
 
   await trx.commit();
 
@@ -22,6 +23,7 @@ export async function setupDatabase(): Promise<DatabaseSetupResult> {
     teams: teamsStatus,
     team_invites: teamInvitesStatus,
     team_memberships: teamMembershipsStatus,
+    participants: participantsStatus,
   };
 }
 
@@ -66,6 +68,7 @@ async function setupTournamentsTable(
     tableBuilder.timestamp("opens_at");
     tableBuilder.timestamp("starts_at");
     tableBuilder.text("participant_role_id").notNullable();
+    tableBuilder.enum("team_selection_type", ["manual", "random"]);
     tableBuilder.timestamp("inserted_at").defaultTo(trx.fn.now()).notNullable();
   });
 
@@ -157,6 +160,31 @@ async function setupTeamMembershipsTable(
     tableBuilder.text("type").defaultTo("member").notNullable();
     tableBuilder.timestamp("inserted_at").defaultTo(trx.fn.now()).notNullable();
     ``;
+  });
+
+  return "created";
+}
+
+async function setupParticipantsTable(
+  trx: Knex.Transaction
+): Promise<DatabaseChangeType> {
+  const usersTableExists = await trx.schema.hasTable("users");
+
+  if (usersTableExists) {
+    // we might need to check for certain columns in the future
+
+    return "unchanged";
+  }
+
+  await trx.schema.createTable("participants", (tableBuilder) => {
+    tableBuilder.increments("id").primary().notNullable();
+    tableBuilder
+      .integer("tournament_id")
+      .references("tournaments.id")
+      .notNullable();
+    tableBuilder.text("discord_id").notNullable();
+    tableBuilder.uuid("minecraft_uuid");
+    tableBuilder.timestamp("inserted_at").defaultTo(trx.fn.now()).notNullable();
   });
 
   return "created";
